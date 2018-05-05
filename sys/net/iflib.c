@@ -163,7 +163,7 @@ struct iflib_ctx {
 	if_shared_ctx_t ifc_sctx;
 	struct if_softc_ctx ifc_softc_ctx;
 
-	struct mtx ifc_ctx_mtx;
+	struct sx ifc_ctx_sx;
 	struct mtx ifc_state_mtx;
 
 	uint16_t ifc_nhwtxqs;
@@ -537,10 +537,10 @@ rxd_info_zero(if_rxd_info_t ri)
 
 #define CTX_ACTIVE(ctx) ((if_getdrvflags((ctx)->ifc_ifp) & IFF_DRV_RUNNING))
 
-#define CTX_LOCK_INIT(_sc, _name)  mtx_init(&(_sc)->ifc_ctx_mtx, _name, "iflib ctx lock", MTX_DEF)
-#define CTX_LOCK(ctx) mtx_lock(&(ctx)->ifc_ctx_mtx)
-#define CTX_UNLOCK(ctx) mtx_unlock(&(ctx)->ifc_ctx_mtx)
-#define CTX_LOCK_DESTROY(ctx) mtx_destroy(&(ctx)->ifc_ctx_mtx)
+#define CTX_LOCK_INIT(_sc)  sx_init(&(_sc)->ifc_ctx_sx, "iflib ctx lock")
+#define CTX_LOCK(ctx) sx_xlock(&(ctx)->ifc_ctx_sx)
+#define CTX_UNLOCK(ctx) sx_xunlock(&(ctx)->ifc_ctx_sx)
+#define CTX_LOCK_DESTROY(ctx) sx_destroy(&(ctx)->ifc_ctx_sx)
 
 
 #define STATE_LOCK_INIT(_sc, _name)  mtx_init(&(_sc)->ifc_state_mtx, _name, "iflib state lock", MTX_DEF)
@@ -4277,7 +4277,9 @@ iflib_device_register(device_t dev, void *sc, if_shared_ctx_t sctx, if_ctx_t *ct
 		}
 	}
 
+	CTX_LOCK(ctx);
 	if ((err = IFDI_ATTACH_PRE(ctx)) != 0) {
+		CTX_UNLOCK(ctx);
 		device_printf(dev, "IFDI_ATTACH_PRE failed %d\n", err);
 		return (err);
 	}
@@ -4435,6 +4437,7 @@ iflib_device_register(device_t dev, void *sc, if_shared_ctx_t sctx, if_ctx_t *ct
 	if_setgetcounterfn(ctx->ifc_ifp, iflib_if_get_counter);
 	iflib_add_device_sysctl_post(ctx);
 	ctx->ifc_flags |= IFC_INIT_DONE;
+	CTX_UNLOCK(ctx);
 	return (0);
 fail_detach:
 	ether_ifdetach(ctx->ifc_ifp);
@@ -4445,6 +4448,7 @@ fail_queues:
 	/* XXX free queues */
 fail:
 	IFDI_DETACH(ctx);
+	CTX_UNLOCK(ctx);
 	return (err);
 }
 
@@ -4711,8 +4715,7 @@ iflib_register(if_ctx_t ctx)
 
 	_iflib_assert(sctx);
 
-	CTX_LOCK_INIT(ctx, device_get_nameunit(ctx->ifc_dev));
-
+	CTX_LOCK_INIT(ctx);
 	STATE_LOCK_INIT(ctx, device_get_nameunit(ctx->ifc_dev));
 	ifp = ctx->ifc_ifp = if_gethandle(IFT_ETHER);
 	if (ifp == NULL) {
@@ -4770,17 +4773,12 @@ iflib_queues_alloc(if_ctx_t ctx)
 	int nfree_lists = sctx->isc_nfl ? sctx->isc_nfl : 1;
 	caddr_t *vaddrs;
 	uint64_t *paddrs;
-	struct ifmp_ring **brscp;
 
 	KASSERT(ntxqs > 0, ("number of queues per qset must be at least 1"));
 	KASSERT(nrxqs > 0, ("number of queues per qset must be at least 1"));
 
-	brscp = NULL;
-	txq = NULL;
-	rxq = NULL;
-
 /* Allocate the TX ring struct memory */
-	if (!(txq =
+	if (!(ctx->ifc_txqs =
 	    (iflib_txq_t) malloc(sizeof(struct iflib_txq) *
 	    ntxqsets, M_IFLIB, M_NOWAIT | M_ZERO))) {
 		device_printf(dev, "Unable to allocate TX ring memory\n");
@@ -4789,7 +4787,7 @@ iflib_queues_alloc(if_ctx_t ctx)
 	}
 
 	/* Now allocate the RX */
-	if (!(rxq =
+	if (!(ctx->ifc_rxqs =
 	    (iflib_rxq_t) malloc(sizeof(struct iflib_rxq) *
 	    nrxqsets, M_IFLIB, M_NOWAIT | M_ZERO))) {
 		device_printf(dev, "Unable to allocate RX ring memory\n");
@@ -4797,8 +4795,8 @@ iflib_queues_alloc(if_ctx_t ctx)
 		goto rx_fail;
 	}
 
-	ctx->ifc_txqs = txq;
-	ctx->ifc_rxqs = rxq;
+	txq = ctx->ifc_txqs;
+	rxq = ctx->ifc_rxqs;
 
 	/*
 	 * XXX handle allocation failure
@@ -4956,19 +4954,13 @@ iflib_queues_alloc(if_ctx_t ctx)
 /* XXX handle allocation failure changes */
 err_rx_desc:
 err_tx_desc:
+rx_fail:
 	if (ctx->ifc_rxqs != NULL)
 		free(ctx->ifc_rxqs, M_IFLIB);
 	ctx->ifc_rxqs = NULL;
 	if (ctx->ifc_txqs != NULL)
 		free(ctx->ifc_txqs, M_IFLIB);
 	ctx->ifc_txqs = NULL;
-rx_fail:
-	if (brscp != NULL)
-		free(brscp, M_IFLIB);
-	if (rxq != NULL)
-		free(rxq, M_IFLIB);
-	if (txq != NULL)
-		free(txq, M_IFLIB);
 fail:
 	return (err);
 }
@@ -5457,8 +5449,8 @@ iflib_io_tqg_attach(struct grouptask *gt, void *uniq, int cpu, char *name)
 }
 
 void
-iflib_config_gtask_init(if_ctx_t ctx, struct grouptask *gtask, gtask_fn_t *fn,
-	char *name)
+iflib_config_gtask_init(void *ctx, struct grouptask *gtask, gtask_fn_t *fn,
+	const char *name)
 {
 
 	GROUPTASK_INIT(gtask, 0, fn, ctx);
@@ -5538,11 +5530,11 @@ iflib_add_int_delay_sysctl(if_ctx_t ctx, const char *name,
 	    info, 0, iflib_sysctl_int_delay, "I", description);
 }
 
-struct mtx *
+struct sx *
 iflib_ctx_lock_get(if_ctx_t ctx)
 {
 
-	return (&ctx->ifc_ctx_mtx);
+	return (&ctx->ifc_ctx_sx);
 }
 
 static int
