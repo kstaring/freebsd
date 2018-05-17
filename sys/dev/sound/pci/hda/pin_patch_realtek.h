@@ -650,6 +650,98 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 				.pin_patches = pin_patches_dell_xps_jack
 			}, { }
 		}
+	}, { /**** CODEC: HDA_CODEC_ALC662 ****/
+		.id = HDA_CODEC_ALC662,
+		.patches = (struct model_pin_patch_t[]){
+			{
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ACER_8924G_SUBVENDOR),
+					PIN_SUBVENDOR(ACER_8943G_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_OVERRIDE(0x15, 0x99130112),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(SAMSUNG_R720_SUBVENDOR),
+					PIN_SUBVENDOR(LENOVO_Y550P_SUBVENDOR),
+					PIN_SUBVENDOR(LENOVO_Y550_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_OVERRIDE(0x17, 0x99130112),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(HP_RP5800_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_OVERRIDE(0x14, 0x0221201f),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ASUS_N50VM_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_K73JN_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_11D3ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1203ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_660JX_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_Z71V_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N81DE_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F50GX_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F50Z_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N80VC_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_VX5_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N81TE_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N505TP_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F5GL_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_VX3V_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1953ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N5051A_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N20_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F7Z_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_19E3ID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_OVERRIDE(0x14, 0x99130110), /* speaker */
+					PIN_OVERRIDE(0x18, 0x01a19c20), /* mic */
+					PIN_OVERRIDE(0x19, 0x99a3092f), /* int mic */
+					PIN_PATCH_HP_OUT(0x21),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(COEUS_9087ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_11F3ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1339ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_16C3ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_K40C_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1753ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1783ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X58LE_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1813ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1843ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1864ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1876ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1913ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F80Q_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F5Z_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_OVERRIDE(0x14, 0x99130110), /* speaker */
+					PIN_OVERRIDE(0x18, 0x01a19820), /* mic */
+					PIN_OVERRIDE(0x19, 0x99a3092f), /* int mic */
+					PIN_PATCH_HP_OUT(0x1b),
+					{ }
+				}
+			}, { }
+		}
 	}, { /**** CODEC: HDA_CODEC_ALC861 ****/
 		.id = HDA_CODEC_ALC861,
 		.patches = (struct model_pin_patch_t[]){
