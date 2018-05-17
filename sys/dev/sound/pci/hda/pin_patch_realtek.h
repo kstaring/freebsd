@@ -740,6 +740,40 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					PIN_PATCH_HP_OUT(0x1b),
 					{ }
 				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ASUS_1092ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_M70V_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N90_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F70SL_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_M50VM_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X55_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X71C_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_OVERRIDE(0x14, 0x99130110), /* speaker */
+					PIN_OVERRIDE(0x15, 0x0121441f), /* hp */
+					PIN_OVERRIDE(0x18, 0x01a19840), /* mic */
+					PIN_OVERRIDE(0x19, 0x99a3094f), /* int mic */
+					PIN_OVERRIDE(0x21, 0x01211420), /* hp2 */
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ASUS_N750_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N76VZ_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_19F3ID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_OVERRIDE(0x14, 0x99130110), /* speaker */
+					PIN_PATCH_SUBWOOFER(0x16),
+					PIN_OVERRIDE(0x18, 0x01a19840), /* mic */
+					PIN_OVERRIDE(0x19, 0x99a3094f), /* int mic */
+					PIN_OVERRIDE(0x21, 0x0121441f), /* hp */
+					{ }
+				}
 			}, { }
 		}
 	}, { /**** CODEC: HDA_CODEC_ALC861 ****/
