@@ -366,6 +366,7 @@ pdpt_entry_t *IdlePDPT;	/* phys addr of kernel PDPT */
 #endif
 pt_entry_t *KPTmap;	/* address of kernel page tables */
 u_long KPTphys;		/* phys addr of kernel page tables */
+extern u_long tramp_idleptd;
 
 static u_long
 allocpages(u_int cnt, u_long *physfree)
@@ -531,6 +532,7 @@ pmap_cold(void)
 #else
 	cr3 = (u_int)IdlePTD;
 #endif
+	tramp_idleptd = cr3;
 	load_cr3(cr3);
 	load_cr0(rcr0() | CR0_PG);
 
@@ -690,6 +692,10 @@ pmap_init_reserved_pages(void)
 		pc->pc_copyout_saddr = kva_alloc(ptoa(2));
 		if (pc->pc_copyout_saddr == 0)
 			panic("unable to allocate sleepable copyout KVA");
+		pc->pc_pmap_eh_va = kva_alloc(ptoa(1));
+		if (pc->pc_pmap_eh_va == 0)
+			panic("unable to allocate pmap_extract_and_hold KVA");
+		pc->pc_pmap_eh_ptep = (char *)vtopte(pc->pc_pmap_eh_va);
 
 		/*
 		 * Skip if the mappings have already been initialized,
@@ -1596,8 +1602,8 @@ pmap_extract(pmap_t pmap, vm_offset_t va)
 vm_page_t
 pmap_extract_and_hold(pmap_t pmap, vm_offset_t va, vm_prot_t prot)
 {
-	pd_entry_t pde;
-	pt_entry_t pte, *ptep;
+	pd_entry_t pde, newpf;
+	pt_entry_t *eh_ptep, pte, *ptep;
 	vm_page_t m;
 	vm_paddr_t pa;
 
@@ -1617,9 +1623,17 @@ retry:
 				vm_page_hold(m);
 			}
 		} else {
-			ptep = pmap_pte(pmap, va);
+			newpf = pde & PG_FRAME;
+			critical_enter();
+			eh_ptep = (pt_entry_t *)PCPU_GET(pmap_eh_ptep);
+			if ((*eh_ptep & PG_FRAME) != newpf) {
+				*eh_ptep = newpf | PG_RW | PG_V | PG_A | PG_M;
+				invlcaddr((void *)PCPU_GET(pmap_eh_va));
+			}
+			ptep = (pt_entry_t *)PCPU_GET(pmap_eh_va) +
+			    (i386_btop(va) & (NPTEPG - 1));
 			pte = *ptep;
-			pmap_pte_release(ptep);
+			critical_exit();
 			if (pte != 0 &&
 			    ((pte & PG_RW) || (prot & VM_PROT_WRITE) == 0)) {
 				if (vm_page_pa_tryrelock(pmap, pte & PG_FRAME,
