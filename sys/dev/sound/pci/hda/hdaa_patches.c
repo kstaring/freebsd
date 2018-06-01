@@ -311,6 +311,7 @@ hdac_pin_patch(struct hdaa_widget *w)
 
 		pin_patches = match_pin_patches(id, subid);
 
+<<<<<<< HEAD
 		for (struct pin_patch_t *p = pin_patches; p->type; p++) {
 			if (nid == p->nid) {
 				switch (p->type) {
@@ -325,9 +326,27 @@ hdac_pin_patch(struct hdaa_widget *w)
 					break;
 				default:
 					/* should panic hard */
+=======
+		if (pin_patches != NULL) {
+			for (struct pin_patch_t *patch = pin_patches; patch->type; patch++) {
+				if (nid == patch->nid) {
+					switch (patch->type) {
+					case PIN_PATCH_TYPE_STRING:
+						patch_str = patch->patch.string;
+					case PIN_PATCH_TYPE_MASK:
+						config &= ~patch->patch.mask[0];
+						config |= patch->patch.mask[1];
+						break;
+					case PIN_PATCH_TYPE_OVERRIDE:
+						config = patch->patch.override;
+						break;
+					default:
+						/* should panic hard */
+						break;
+					}
+>>>>>>> hda_pin_fixes_realtek_alc280
 					break;
 				}
-				break;
 			}
 		}
 	}
