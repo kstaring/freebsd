@@ -660,7 +660,7 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					{ }
 				},
 				.pin_patches = (struct pin_patch_t[]){
-					PIN_OVERRIDE(0x15, 0x99130112),
+					PIN_PATCH_STRING(21, "seq=2 as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
 					{ }
 				}
 			}, {
@@ -671,7 +671,7 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					{ }
 				},
 				.pin_patches = (struct pin_patch_t[]){
-					PIN_OVERRIDE(0x17, 0x99130112),
+					PIN_PATCH_STRING(23, "seq=2 as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
 					{ }
 				}
 			}, {
@@ -680,7 +680,7 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					{ }
 				},
 				.pin_patches = (struct pin_patch_t[]){
-					PIN_OVERRIDE(0x14, 0x0221201f),
+					PIN_PATCH_STRING(20, "seq=15 as=1 color=Grey ctype=1/8 device=Headphones loc=Front"),
 					{ }
 				}
 			}, {
@@ -708,10 +708,10 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					{ }
 				},
 				.pin_patches = (struct pin_patch_t[]){
-					PIN_OVERRIDE(0x14, 0x99130110), /* speaker */
-					PIN_OVERRIDE(0x18, 0x01a19c20), /* mic */
-					PIN_OVERRIDE(0x19, 0x99a3092f), /* int mic */
-					PIN_PATCH_HP_OUT(0x21),
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(24, "as=2 misc=12 color=Pink ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_STRING(25, "seq=15 as=2 misc=9 ctype=ATAPI device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_HP_OUT(33),
 					{ }
 				}
 			}, {
@@ -734,10 +734,10 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					{ }
 				},
 				.pin_patches = (struct pin_patch_t[]){
-					PIN_OVERRIDE(0x14, 0x99130110), /* speaker */
-					PIN_OVERRIDE(0x18, 0x01a19820), /* mic */
-					PIN_OVERRIDE(0x19, 0x99a3092f), /* int mic */
-					PIN_PATCH_HP_OUT(0x1b),
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(24,  "as=2 misc=8 color=Pink ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_STRING(25, "seq=15 as=2 misc=9 ctype=ATAPI device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_HP_OUT(27),
 					{ }
 				}
 			}, {
@@ -752,11 +752,11 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					{ }
 				},
 				.pin_patches = (struct pin_patch_t[]){
-					PIN_OVERRIDE(0x14, 0x99130110), /* speaker */
-					PIN_OVERRIDE(0x15, 0x0121441f), /* hp */
-					PIN_OVERRIDE(0x18, 0x01a19840), /* mic */
-					PIN_OVERRIDE(0x19, 0x99a3094f), /* int mic */
-					PIN_OVERRIDE(0x21, 0x01211420), /* hp2 */
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(21, "seq=15 as=1 misc=4 color=Green ctype=1/8 device=Headphones loc=Rear"),
+					PIN_PATCH_STRING(24, "as=4 misc=8 color=Pink ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_STRING(25, "seq=15 as=4 misc=9 ctype=ATAPI device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(33, "as=2 misc=4 color=Black ctype=1/8 device=Headphones loc=Rear"),
 					{ }
 				}
 			}, {
@@ -767,11 +767,11 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					{ }
 				},
 				.pin_patches = (struct pin_patch_t[]){
-					PIN_OVERRIDE(0x14, 0x99130110), /* speaker */
-					PIN_PATCH_SUBWOOFER(0x16),
-					PIN_OVERRIDE(0x18, 0x01a19840), /* mic */
-					PIN_OVERRIDE(0x19, 0x99a3094f), /* int mic */
-					PIN_OVERRIDE(0x21, 0x0121441f), /* hp */
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_SUBWOOFER(22),
+					PIN_PATCH_STRING(24, "as=4 misc=8 color=Pink ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_STRING(25, "seq=15 as=4 misc=9 ctype=ATAPI device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(33, "seq=15 as=1 misc=4 color=Green ctype=1/8 device=Headphones loc=Rear"),
 					{ }
 				}
 			}, { }
