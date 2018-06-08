@@ -519,8 +519,7 @@ ppc970_intr(int cpu, struct trapframe *tf)
 		if (pm->pm_state != PMC_STATE_RUNNING)
 			continue;
 
-		error = pmc_process_interrupt(cpu, PMC_HR, pm, tf,
-		    TRAPF_USERMODE(tf));
+		error = pmc_process_interrupt(PMC_HR, pm, tf);
 		if (error != 0)
 			ppc970_stop_pmc(cpu, i);
 
@@ -528,8 +527,10 @@ ppc970_intr(int cpu, struct trapframe *tf)
 		ppc970_write_pmc(cpu, i, pm->pm_sc.pm_reloadcount);
 	}
 
-	atomic_add_int(retval ? &pmc_stats.pm_intr_processed :
-	    &pmc_stats.pm_intr_ignored, 1);
+	if (retval)
+		counter_u64_add(pmc_stats.pm_intr_processed, 1);
+	else
+		counter_u64_add(pmc_stats.pm_intr_ignored, 1);
 
 	/* Re-enable PERF exceptions. */
 	if (retval)

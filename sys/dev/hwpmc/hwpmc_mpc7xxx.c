@@ -702,17 +702,17 @@ mpc7xxx_intr(int cpu, struct trapframe *tf)
 			continue;
 
 		/* Stop the counter if logging fails. */
-		error = pmc_process_interrupt(cpu, PMC_HR, pm, tf,
-		    TRAPF_USERMODE(tf));
+		error = pmc_process_interrupt(PMC_HR, pm, tf);
 		if (error != 0)
 			mpc7xxx_stop_pmc(cpu, i);
 
 		/* reload count. */
 		mpc7xxx_write_pmc(cpu, i, pm->pm_sc.pm_reloadcount);
 	}
-
-	atomic_add_int(retval ? &pmc_stats.pm_intr_processed :
-	    &pmc_stats.pm_intr_ignored, 1);
+	if (retval)
+		counter_u64_add(pmc_stats.pm_intr_processed, 1);
+	else
+		counter_u64_add(pmc_stats.pm_intr_ignored, 1);
 
 	/* Re-enable PERF exceptions. */
 	if (retval)
