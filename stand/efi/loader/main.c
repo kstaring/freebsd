@@ -31,7 +31,6 @@ __FBSDID("$FreeBSD$");
 #include <sys/disk.h>
 #include <sys/param.h>
 #include <sys/reboot.h>
-#include <sys/boot.h>
 #include <stdint.h>
 #include <stand.h>
 #include <string.h>
@@ -53,8 +52,6 @@ __FBSDID("$FreeBSD$");
 #endif
 
 #include "loader_efi.h"
-
-extern char bootprog_info[];
 
 struct arch_switch archsw;	/* MI/MD interface boundary */
 
@@ -416,7 +413,8 @@ main(int argc, CHAR16 *argv[])
 {
 	char var[128];
 	EFI_GUID *guid;
-	int i, j, vargood, howto;
+	int i, j, howto;
+	bool vargood;
 	UINTN k;
 	int has_kbd;
 	char *s;
@@ -533,14 +531,14 @@ main(int argc, CHAR16 *argv[])
 				}
 			}
 		} else {
-			vargood = 0;
+			vargood = false;
 			for (j = 0; argv[i][j] != 0; j++) {
 				if (j == sizeof(var)) {
-					vargood = 0;
+					vargood = false;
 					break;
 				}
 				if (j > 0 && argv[i][j] == '=')
-					vargood = 1;
+					vargood = true;
 				var[j] = (char)argv[i][j];
 			}
 			if (vargood) {
@@ -549,9 +547,8 @@ main(int argc, CHAR16 *argv[])
 			}
 		}
 	}
-	for (i = 0; howto_names[i].ev != NULL; i++)
-		if (howto & howto_names[i].mask)
-			setenv(howto_names[i].ev, "YES", 1);
+
+	bootenv_set(howto);
 
 	/*
 	 * XXX we need fallback to this stuff after looking at the ConIn, ConOut and ConErr variables

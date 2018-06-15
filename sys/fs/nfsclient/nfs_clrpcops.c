@@ -4620,7 +4620,7 @@ nfsrpc_setaclrpc(vnode_t vp, struct ucred *cred, NFSPROC_T *p,
 	NFSZERO_ATTRBIT(&attrbits);
 	NFSSETBIT_ATTRBIT(&attrbits, NFSATTRBIT_ACL);
 	(void) nfsv4_fillattr(nd, vnode_mount(vp), vp, aclp, NULL, NULL, 0,
-	    &attrbits, NULL, NULL, 0, 0, 0, 0, (uint64_t)0);
+	    &attrbits, NULL, NULL, 0, 0, 0, 0, (uint64_t)0, NULL);
 	error = nfscl_request(nd, vp, p, cred, stuff);
 	if (error)
 		return (error);
@@ -6436,7 +6436,7 @@ nfsio_writedsmir(vnode_t vp, int *iomode, int *must_commit,
 	drpc->p = p;
 	drpc->inprog = 0;
 	ret = EIO;
-	if (nfs_pnfsiothreads > 0) {
+	if (nfs_pnfsiothreads != 0) {
 		ret = nfs_pnfsio(start_writedsmir, drpc);
 		NFSCL_DEBUG(4, "nfsio_writedsmir: nfs_pnfsio=%d\n", ret);
 	}
@@ -6615,7 +6615,7 @@ nfsio_commitds(vnode_t vp, uint64_t offset, int cnt, struct nfsclds *dsp,
 	drpc->p = p;
 	drpc->inprog = 0;
 	ret = EIO;
-	if (nfs_pnfsiothreads > 0) {
+	if (nfs_pnfsiothreads != 0) {
 		ret = nfs_pnfsio(start_commitds, drpc);
 		NFSCL_DEBUG(4, "nfsio_commitds: nfs_pnfsio=%d\n", ret);
 	}
