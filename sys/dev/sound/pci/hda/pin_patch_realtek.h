@@ -462,16 +462,6 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 				}
 			}, {
 				.models = (struct pin_machine_model_t[]){
-					PIN_SUBVENDOR(SONY_VAIO_P11_SUBVENDOR),
-					PIN_SUBVENDOR(SONY_VAIO_P13_SUBVENDOR),
-					{ }
-				},
-				.pin_patches = (struct pin_patch_t[]){
-					PIN_PATCH_JACK_WO_DETECT(25),
-        				{ }
-				}
-			}, {
-				.models = (struct pin_machine_model_t[]){
 					PIN_SUBVENDOR(ASUS_X101CH_SUBVENDOR),
 					{ }
 				},
@@ -560,6 +550,21 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					PIN_PATCH_STRING(29, "seq=13 as=2 misc=11 color=Pink ctype=DIN device=Other conn=None"),
 					PIN_PATCH_NOT_APPLICABLE(30),
 					PIN_PATCH_STRING(33, "seq=15 as=1 color=Black ctype=1/8 device=Headphones loc=Left"),
+        				{ }
+				}
+			}, { }
+		}
+	}, { /**** CODEC: HDA_CODEC_ALC286 ****/
+		.id = HDA_CODEC_ALC286,
+		.patches = (struct model_pin_patch_t[]){
+			{
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(SONY_VAIO_P11_SUBVENDOR),
+					PIN_SUBVENDOR(SONY_VAIO_P13_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_JACK_WO_DETECT(25),
         				{ }
 				}
 			}, { }
