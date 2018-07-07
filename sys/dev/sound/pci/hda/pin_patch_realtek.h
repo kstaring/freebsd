@@ -208,6 +208,37 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 				}
 			}, { }
 		}
+	}, { /**** CODEC: HDA_CODEC_ALC256 ****/
+		.id = HDA_CODEC_ALC256,
+		.patches = (struct model_pin_patch_t[]){
+			{
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(DELL_9020M_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_7000_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(27, "seq=1 as=5 misc=1 ctype=Analog device=Speaker loc=Internal conn=Fixed"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ASUS_X540A_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X540SA_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X541SA_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X541UV_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_Z550SA_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X705UD_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X555UB_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_MIC_INTERNAL(19),
+					PIN_PATCH_STRING(25, "as=2 misc=1 color=Black ctype=1/8 device=Mic loc=Right"),
+        				{ }
+				}
+			}, { }
+		}
 	}, { /**** CODEC: HDA_CODEC_ALC260 ****/
 		.id = HDA_CODEC_ALC260,
 		.patches = (struct model_pin_patch_t[]){
