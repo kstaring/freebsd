@@ -415,6 +415,23 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 				}
 			}, { }
 		}
+	}, { /**** CODEC: HDA_CODEC_ALC280 ****/
+		.id = HDA_CODEC_ALC280,
+		.patches = (struct model_pin_patch_t[]){
+			{
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(HP_2272ID_SUBVENDOR),
+					PIN_SUBVENDOR(HP_2273ID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(27, "as=2 color=Black ctype=1/8 loc=Ext-Rear"),
+					PIN_PATCH_HPMIC_WITH_DETECT(26),
+					PIN_PATCH_STRING(24, "seq=15 as=3 color=Black ctype=1/8 device=Line-in loc=Ext-Rear"),
+        				{ }
+				}
+			}, { }
+		}
 	}, { /**** CODEC: HDA_CODEC_ALC288 ****/
 		.id = HDA_CODEC_ALC288,
 		.patches = (struct model_pin_patch_t[]){
