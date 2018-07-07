@@ -194,6 +194,43 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					PIN_PATCH_STRING(16, "seq=15 device=Headphones"),
         				{ }
 				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(HP_DC5750_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(17, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Internal conn=Fixed"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(SONY_VAIO_TX_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(15, "color=Green ctype=1/8 device=Headphones loc=Rear"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(SONY_81BBID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(15,  "as=2 color=Black ctype=1/8 device=Headphones loc=Rear"),
+					PIN_PATCH_STRING(16, "seq=15 as=3 ctype=1/8"),
+					PIN_PATCH_NOT_APPLICABLE(17),
+					PIN_PATCH_STRING(18, "as=3 misc=9 color=Red ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_NOT_APPLICABLE(19),
+					PIN_PATCH_NOT_APPLICABLE(20),
+					PIN_PATCH_NOT_APPLICABLE(21),
+					PIN_PATCH_NOT_APPLICABLE(22),
+					PIN_PATCH_NOT_APPLICABLE(23),
+					PIN_PATCH_NOT_APPLICABLE(24),
+					PIN_PATCH_NOT_APPLICABLE(25),
+        				{ }
+				}
 			}, { }
 		}
 	}, { /**** CODEC: HDA_CODEC_ALC268 ****/
@@ -206,6 +243,15 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 				},
 				.pin_patches = (struct pin_patch_t[]){
 					PIN_PATCH_STRING(20, "as=1 seq=15"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ACER_TM_6293_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(30, "as=8 misc=1 color=Black ctype=Combo device=SPDIF-out loc=Rear"),
         				{ }
 				}
 			}, { }
