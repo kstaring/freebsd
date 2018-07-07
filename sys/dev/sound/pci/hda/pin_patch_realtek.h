@@ -262,13 +262,24 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 			{
 				.models = (struct pin_machine_model_t[]){
 					PIN_SUBVENDOR(LENOVO_X1CRBN_SUBVENDOR),
-					PIN_SUBVENDOR(LENOVO_T430_SUBVENDOR),
-					PIN_SUBVENDOR(LENOVO_T430S_SUBVENDOR),
-					PIN_SUBVENDOR(LENOVO_T530_SUBVENDOR),
 					{ }
 				},
 				.pin_patches = (struct pin_patch_t[]){
 					PIN_PATCH_STRING(21, "as=1 seq=15"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(LENOVO_T430_SUBVENDOR),
+					PIN_SUBVENDOR(LENOVO_T430S_SUBVENDOR),
+					PIN_SUBVENDOR(LENOVO_X230_SUBVENDOR),
+					PIN_SUBVENDOR(LENOVO_X230T_SUBVENDOR),
+					PIN_SUBVENDOR(LENOVO_T431S_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_DOCK_MIC_IN(25),
+					PIN_PATCH_DOCK_HP(27),
         				{ }
 				}
 			}, {
@@ -278,6 +289,128 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 				},
 				.pin_patches = (struct pin_patch_t[]){
 					PIN_PATCH_STRING(33, "as=1 seq=15"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ASUS_G73JW_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_SUBWOOFER(23),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(FL_1475ID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_DOCK_LINE_OUT(26),
+					PIN_PATCH_DOCK_MIC_IN(27),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(FL_LB_U904_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_HPMIC_WITH_DETECT(25),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(FL_LB_T731_SUBVENDOR),
+					PIN_SUBVENDOR(FL_LB_E725_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(33, "seq=15 as=2 color=Black ctype=1/8 device=Headphones loc=Front"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(DELL_05F4ID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_05F5ID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_05F6ID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_JACK_WO_DETECT(25),
+					PIN_PATCH_HPMIC_WO_DETECT(26),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ACER_V5_571G_SUBVENDOR),
+					PIN_SUBVENDOR(ACER_V5_122P_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_JACK_WO_DETECT(25),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(SONY_VAIO_P11_SUBVENDOR),
+					PIN_SUBVENDOR(SONY_VAIO_P13_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_JACK_WO_DETECT(25),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ASUS_X101CH_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(24, "seq=12 as=2 misc=8 color=Black ctype=1/8 device=Mic loc=Right"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ACER_AC700_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(18, "seq=15 as=2 misc=9 ctype=ATAPI device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(20,  "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(24, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(30, "seq=14 as=1 color=Black ctype=Digital device=SPDIF-out loc=Left"),
+					PIN_PATCH_STRING(33, "seq=15 as=1 color=Black ctype=1/8 device=Headphones loc=Left"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(HP_225AID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(24, "seq=15 as=3 color=Black ctype=1/8 device=Line-in loc=Ext-Rear"),
+					PIN_PATCH_STRING(27, "as=2 color=Black ctype=1/8 loc=Ext-Rear"),
+        				{ }
+				}
+			}, { }
+		}
+	}, { /**** CODEC: HDA_CODEC_ALC271 ****/
+		.id = HDA_CODEC_ALC271,
+		.patches = (struct model_pin_patch_t[]){
+			{
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ACER_AO725_SUBVENDOR),
+					PIN_SUBVENDOR(ACER_AO756_SUBVENDOR),
+					PIN_SUBVENDOR(ACER_E1_472_SUBVENDOR),
+					PIN_SUBVENDOR(ACER_E1_572_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(25, "as=2 misc=12 color=Pink ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_STRING(27, "seq=15 as=2 misc=1 ctype=Analog device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_HP_OUT(33),
         				{ }
 				}
 			}, { }

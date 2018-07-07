@@ -56,8 +56,13 @@
 #define PIN_PATCH_SPDIF_OUT(n)          PIN_PATCH_STRING(n, "as=4 misc=1 color=Green ctype=Optical device=SPDIF-out loc=Rear")
 #define PIN_PATCH_JACK_WO_DETECT(n)     PIN_PATCH_STRING(n, "seq=12 as=3 misc=1 color=Pink ctype=1/8 device=Mic loc=Rear")
 #define PIN_PATCH_HPMIC_WO_DETECT(n)    PIN_PATCH_STRING(n, "seq=13 as=3 misc=1 color=Pink ctype=1/8 device=Mic loc=Rear")
+#define PIN_PATCH_HPMIC_WITH_DETECT(n)  PIN_PATCH_STRING(n, "seq=12 as=3 color=Pink ctype=1/8 device=Mic loc=Rear")
 #define PIN_PATCH_CLFE(n)               PIN_PATCH_STRING(n, "seq=1 as=1 misc=4 color=Black ctype=1/8 loc=Rear")
 #define PIN_PATCH_SURROUND(n)           PIN_PATCH_STRING(n, "seq=2 as=1 misc=4 color=Orange ctype=1/8 loc=Rear")
+#define PIN_PATCH_SUBWOOFER(n)          PIN_PATCH_STRING(n, "seq=1 as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed")
+#define PIN_PATCH_DOCK_LINE_OUT(n)      PIN_PATCH_STRING(n, "seq=15 as=3 color=Black ctype=1/8 loc=Ext-Rear")
+#define PIN_PATCH_DOCK_HP(n)            PIN_PATCH_STRING(n, "seq=15 as=3 color=Black ctype=1/8 device=Headphones loc=Ext-Rear")
+#define PIN_PATCH_DOCK_MIC_IN(n)        PIN_PATCH_STRING(n, "as=4 color=Black ctype=1/8 device=Mic loc=Ext-Left")
 
 enum {
 	PIN_PATCH_TYPE_EOL,			/* end-of-list */
