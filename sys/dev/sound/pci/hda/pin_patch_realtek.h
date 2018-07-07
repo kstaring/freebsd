@@ -290,6 +290,58 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 				}
 			}, { }
 		}
+	}, { /**** CODEC: HDA_CODEC_ALC262 ****/
+		.id = HDA_CODEC_ALC262,
+		.patches = (struct model_pin_patch_t[]){
+			{
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(FS_H270_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(21, "seq=15 as=2 misc=4 color=Black ctype=1/8 device=Headphones loc=Front"),
+					PIN_PATCH_STRING(22, "seq=15 as=1 misc=4 color=Black ctype=1/8 device=Headphones loc=Rear"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(FL_LB_S7110_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(21, "as=1 misc=1 ctype=Analog device=Speaker loc=Internal conn=Fixed"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(HP_Z200_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(22, "as=2 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(TYAN_N6650W_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(22, "as=15 misc=1 color=White ctype=ATAPI device=AUX loc=Onboard"),
+        				{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(LENOVO_3000_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(22, "seq=1 as=2"),
+        				{ }
+				}
+			}, { }
+		}
 	}, { /**** CODEC: HDA_CODEC_ALC268 ****/
 		.id = HDA_CODEC_ALC268,
 		.patches = (struct model_pin_patch_t[]){
