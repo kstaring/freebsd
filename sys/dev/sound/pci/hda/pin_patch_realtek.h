@@ -580,6 +580,26 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 				.pin_patches = pin_patches_dell_xps_jack
 			}, { }
 		}
+	}, { /**** CODEC: HDA_CODEC_ALC290 ****/
+		.id = HDA_CODEC_ALC290,
+		.patches = (struct model_pin_patch_t[]){
+			{
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(DELL_V5470_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_V5470_1_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_V5480_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(18, "as=4 misc=1 ctype=Digital device=Mic loc=Internal conn=Fixed"),
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=Analog device=Speaker loc=Internal conn=Fixed"),
+					PIN_PATCH_STRING(21, "seq=15 as=1 color=Green ctype=1/8 device=Headphones loc=Front"),
+					PIN_PATCH_STRING(23, "seq=2 as=1 misc=1 ctype=Analog device=Speaker loc=Internal conn=Fixed"),
+					PIN_PATCH_JACK_WO_DETECT(26),
+        				{ }
+				}
+			}, { }
+		}
 	}, { /**** CODEC: HDA_CODEC_ALC292 ****/
 		.id = HDA_CODEC_ALC292,
 		.patches = (struct model_pin_patch_t[]){
@@ -590,6 +610,31 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 				},
 				.pin_patches = (struct pin_patch_t[]){
 					PIN_PATCH_STRING(21, "as=1 seq=15"),
+        				{ }
+				}
+			}, { }
+		}
+	}, { /**** CODEC: HDA_CODEC_ALC293 ****/
+		.id = HDA_CODEC_ALC293,
+		.patches = (struct model_pin_patch_t[]){
+			{
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(DELL_064AID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_064BID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_06D9ID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_06DAID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_06DBID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_06DDID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_06DEID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_06DFID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_06E0ID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_164AID_SUBVENDOR),
+					PIN_SUBVENDOR(DELL_164BID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_HPMIC_WO_DETECT(24),
+					PIN_PATCH_JACK_WO_DETECT(26),
         				{ }
 				}
 			}, { }
