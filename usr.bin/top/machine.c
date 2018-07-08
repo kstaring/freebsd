@@ -79,8 +79,6 @@ struct handle {
 #define PROCSIZE(pp) ((pp)->ki_size / 1024)
 
 #define RU(pp)	(&(pp)->ki_rusage)
-#define RUTOT(pp) \
-	(RU(pp)->ru_inblock + RU(pp)->ru_oublock + RU(pp)->ru_majflt)
 
 #define	PCTCPU(pp) (pcpu[pp - pbase])
 
@@ -94,19 +92,20 @@ static const char io_header[] =
 static const char io_Proc_format[] =
     "%5d%*s %-*.*s %6ld %6ld %6ld %6ld %6ld %6ld %6.2f%% %.*s";
 
+/* XXX: build up header instead of statically defining them.
+ * This will also allow for a "format string" to be supplied
+ * as an argument to top(1) instead of having predefined options */
 static const char smp_header_thr_and_pid[] =
-    "  PID%*s %-*.*s  THR PRI NICE   SIZE    RES%*s STATE   C   TIME %7s COMMAND";
-static const char smp_header_tid_only[] =
-    "  THR%*s %-*.*s "   "PRI NICE   SIZE    RES%*s STATE   C   TIME %7s COMMAND";
-
+    "  %s%*s %-*.*s  THR PRI NICE   SIZE    RES%*s STATE   C   TIME %7s COMMAND";
+static const char smp_header_id_only[] =
+    "  %s%*s %-*.*s  PRI NICE   SIZE    RES%*s STATE   C   TIME %7s COMMAND";
 static const char smp_Proc_format[] =
     "%5d%*s %-*.*s %s%3d %4s%7s %6s%*.*s %-6.6s %2d%7s %6.2f%% %.*s";
 
 static char up_header_thr_and_pid[] =
     "  PID%*s %-*.*s  THR PRI NICE   SIZE    RES%*s STATE    TIME %7s COMMAND";
-static char up_header_tid_only[] =
-    "  THR%*s %-*.*s "   "PRI NICE   SIZE    RES%*s STATE    TIME %7s COMMAND";
-
+static char up_header_id_only[] =
+    "  %s%*s %-*.*s   PRI NICE   SIZE    RES%*s STATE    TIME %7s COMMAND";
 static char up_Proc_format[] =
     "%5d%*s %-*.*s %s%3d %4s%7s %6s%*.*s %-6.6s%.0d%7s %6.2f%% %.*s";
 
@@ -305,7 +304,7 @@ machine_init(struct statics *statics)
 {
 	int i, j, empty, pagesize;
 	uint64_t arc_size;
-	bool carc_en;
+	int carc_en;
 	size_t size;
 
 	size = sizeof(smpmode);
@@ -427,19 +426,31 @@ format_header(const char *uname_field)
 	switch (displaymode) {
 	case DISP_CPU:
 		/*
-		 * The logic of picking the right header format seems reverse
-		 * here because we only want to display a THR column when
-		 * "thread mode" is off (and threads are not listed as
-		 * separate lines).
+		 * The logic of picking the right header is confusing, and
+		 * depends on too much. We should instead have a struct of
+		 * "header name", and "header format" which we build up.
+		 * This would also fix the duplicate of effort into up vs smp
+		 * mode.
 		 */
-		prehead = smpmode ?
-		    (ps.thread ? smp_header_tid_only : smp_header_thr_and_pid) :
-		    (ps.thread ? up_header_tid_only : up_header_thr_and_pid);
-		snprintf(Header, sizeof(Header), prehead,
-		    jidlength, ps.jail ? " JID" : "",
-		    namelength, namelength, uname_field,
-		    swaplength, ps.swap ? " SWAP" : "",
-		    ps.wcpu ? "WCPU" : "CPU");
+		if (smpmode) {
+			prehead = ps.thread ?
+				smp_header_id_only : smp_header_thr_and_pid;
+			snprintf(Header, sizeof(Header), prehead,
+					ps.thread_id ? " THR" : "PID",
+					jidlength, ps.jail ? " JID" : "",
+					namelength, namelength, uname_field,
+					swaplength, ps.swap ? " SWAP" : "",
+					ps.wcpu ? "WCPU" : "CPU");
+		} else {
+			prehead = ps.thread ?
+				up_header_id_only : up_header_thr_and_pid;
+			snprintf(Header, sizeof(Header), prehead,
+					ps.thread_id ? " THR" : "PID",
+					jidlength, ps.jail ? " JID" : "",
+					namelength, namelength, uname_field,
+					swaplength, ps.swap ? " SWAP" : "",
+					ps.wcpu ? "WCPU" : "CPU");
+		}
 		break;
 	case DISP_IO:
 		prehead = io_header;
@@ -828,11 +839,11 @@ get_process_info(struct system_info *si, struct process_select *sel,
 			/* not in use */
 			continue;
 
-		if (sel->self != -1 && pp->ki_pid == sel->self)
+		if (!sel->self && pp->ki_pid == mypid && sel->pid == -1)
 			/* skip self */
 			continue;
 
-		if (!sel->system && (pp->ki_flag & P_SYSTEM))
+		if (!sel->system && (pp->ki_flag & P_SYSTEM) && sel->pid == -1)
 			/* skip system process */
 			continue;
 
@@ -848,7 +859,7 @@ get_process_info(struct system_info *si, struct process_select *sel,
 			/* skip zombies */
 			continue;
 
-		if (!sel->kidle && pp->ki_tdflags & TDF_IDLETD)
+		if (!sel->kidle && pp->ki_tdflags & TDF_IDLETD && sel->pid == -1)
 			/* skip kernel idle process */
 			continue;
 
@@ -1076,7 +1087,7 @@ format_next_process(void* xhandle, char *(*get_userid)(int), int flags)
 	else
 		snprintf(swap_buf, sizeof(swap_buf), "%*s",
 		    swaplength - 1,
-		    format_k2(pagetok(ki_swap(pp)))); /* XXX */
+		    format_k(pagetok(ki_swap(pp)))); /* XXX */
 
 	if (displaymode == DISP_IO) {
 		oldp = get_old_proc(pp);
@@ -1131,14 +1142,14 @@ format_next_process(void* xhandle, char *(*get_userid)(int), int flags)
 		    (int)(sizeof(thr_buf) - 2), pp->ki_numthreads);
 
 	snprintf(fmt, sizeof(fmt), proc_fmt,
-	    (ps.thread) ? pp->ki_tid : pp->ki_pid,
+	    (ps.thread_id) ? pp->ki_tid : pp->ki_pid,
 	    jidlength, jid_buf,
 	    namelength, namelength, (*get_userid)(pp->ki_ruid),
 	    thr_buf,
 	    pp->ki_pri.pri_level - PZERO,
 	    format_nice(pp),
-	    format_k2(PROCSIZE(pp)),
-	    format_k2(pagetok(pp->ki_rssize)),
+	    format_k(PROCSIZE(pp)),
+	    format_k(pagetok(pp->ki_rssize)),
 	    swaplength, swaplength, swap_buf,
 	    status,
 	    cpu,
