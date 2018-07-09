@@ -1007,7 +1007,7 @@ struct nfsv3_sattr {
 #define	NFSATTRBM_SUPPATTREXCLCREAT	0x00000800
 #define	NFSATTRBM_FSCHARSETCAP		0x00001000
 
-#define	NFSATTRBIT_MAX			77
+#define	NFSATTRBIT_MAX			83
 
 /*
  * Sets of attributes that are supported, by words in the bitmap.
@@ -1397,6 +1397,7 @@ struct nfsv3_pathconf {
 	u_int32_t pc_chownrestricted;
 	u_int32_t pc_caseinsensitive;
 	u_int32_t pc_casepreserving;
+	u_int32_t pc_extattrsupport;
 };
 
 /*

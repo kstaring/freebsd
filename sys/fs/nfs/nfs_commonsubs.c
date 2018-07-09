@@ -1255,6 +1255,7 @@ nfsv4_loadattr(struct nfsrv_descript *nd, vnode_t vp,
 			pc->pc_chownrestricted = 0;
 			pc->pc_caseinsensitive = 0;
 			pc->pc_casepreserving = 1;
+			pc->pc_extattrsupport = 1;
 		}
 		if (sfp != NULL) {
 			sfp->sf_ffiles = UINT64_MAX;
@@ -2169,6 +2170,19 @@ nfsv4_loadattr(struct nfsrv_descript *nd, vnode_t vp,
 			if (compare && !(*retcmpp) && i != NFS_SRVMAXIO)
 				*retcmpp = NFSERR_NOTSAME;
 			break;
+		case NFSATTRBIT_XATTR_SUPPORT:
+			NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+			if (compare) {
+				if (!(*retcmpp)) {
+				    if (*tl != newnfs_true)
+					*retcmpp = NFSERR_NOTSAME;
+				}
+			} else if (pc != NULL) {
+				pc->pc_extattrsupport =
+				    fxdr_unsigned(u_int32_t, *tl);
+			}
+			attrsum += NFSX_UNSIGNED;
+			break;
 		default:
 			printf("EEK! nfsv4_loadattr unknown attr=%d\n",
 				bitpos);
@@ -2963,8 +2977,20 @@ nfsv4_fillattr(struct nfsrv_descript *nd, struct mount *mp, vnode_t vp,
 			*tl = txdr_unsigned(NFS_SRVMAXIO);
 			retnum += NFSX_UNSIGNED;
 			break;
+		case NFSATTRBIT_XATTR_SUPPORT:
+			NFSM_BUILD(tl, u_int32_t *, NFSX_UNSIGNED);
+			*tl = newnfs_true;
+			retnum += NFSX_UNSIGNED;
+			break;
 		default:
-			printf("EEK! Bad V4 attribute bitpos=%d\n", bitpos);
+			// warn about unrecognized bitpos, but take care
+			// of gap between NFSATTRBIT_FSCHARSETCAP and
+			// NFSATTRBIT_XATTR_SUPPORT which remains
+			// unimplemented.
+			if (bitpos < NFSATTRBIT_FSCHARSETCAP ||
+			    bitpos > NFSATTRBIT_XATTR_SUPPORT)
+				printf("EEK! Bad V4 attribute bitpos=%d\n",
+					bitpos);
 		}
 	    }
 	}
