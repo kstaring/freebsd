@@ -210,7 +210,7 @@ static struct {
 	int	opcnt;
 	const u_char *tag;
 	int	taglen;
-} nfsv4_opmap[NFSV41_NPROCS] = {
+} nfsv4_opmap[NFSV41_PLUS_XATTR_NPROCS] = {
 	{ 0, 1, "Null", 4 },
 	{ NFSV4OP_GETATTR, 1, "Getattr", 7, },
 	{ NFSV4OP_SETATTR, 2, "Setattr", 7, },
@@ -267,6 +267,10 @@ static struct {
 	{ NFSV4OP_COMMIT, 1, "CommitDS", 8, },
 	{ NFSV4OP_OPEN, 3, "OpenLayoutGet", 13, },
 	{ NFSV4OP_OPEN, 8, "CreateLayGet", 12, },
+	{ NFSV4OP_GETXATTR, 2, "GetXAttr", 8, },
+	{ NFSV4OP_SETXATTR, 2, "SetXAttr", 8, },
+	{ NFSV4OP_LISTXATTR, 2, "ListXAttr", 9, },
+	{ NFSV4OP_REMOVEXATTR, 2, "RemoveXAttr", 11, },
 };
 
 /*
