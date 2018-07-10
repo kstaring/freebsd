@@ -262,6 +262,12 @@
 #define	NFSV41_NOPS		59
 #define	NFSV42_NOPS		72
 
+// RFC 8276
+#define	NFSV4OP_GETXATTR	72
+#define	NFSV4OP_SETXATTR	73
+#define	NFSV4OP_LISTXATTR	74
+#define	NFSV4OP_REMOVEXATTR	75
+
 /* Quirky case if the illegal op code */
 #define	NFSV4OP_OPILLEGAL	10044
 
@@ -366,6 +372,9 @@
  * Must be defined as one higher than the last NFSv4.1 Proc# above.
  */
 #define	NFSV41_NPROCS		56
+
+// 
+#define NFSV41_PLUS_XATTR_NPROCS 60
 
 #endif	/* NFS_V3NPROCS */
 

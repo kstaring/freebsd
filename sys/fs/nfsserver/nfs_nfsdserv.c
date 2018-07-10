@@ -2246,6 +2246,7 @@ nfsrvd_pathconf(struct nfsrv_descript *nd, __unused int isdgram,
 		 */
 		pc->pc_caseinsensitive = newnfs_false;
 		pc->pc_casepreserving = newnfs_true;
+		pc->pc_extattrsupport = newnfs_true;
 	}
 
 out:

@@ -1437,7 +1437,8 @@ parsepathconf(netdissect_options *ndo,
 	       EXTRACT_32BITS(&spp->pc_notrunc) ? "notrunc" : "",
 	       EXTRACT_32BITS(&spp->pc_chownrestricted) ? "chownres" : "",
 	       EXTRACT_32BITS(&spp->pc_caseinsensitive) ? "igncase" : "",
-	       EXTRACT_32BITS(&spp->pc_casepreserving) ? "keepcase" : ""));
+	       EXTRACT_32BITS(&spp->pc_casepreserving) ? "keepcase" : "",
+	       EXTRACT_32BITS(&spp->pc_extattrsupport) ? "extattr" : ""));
 	return (1);
 trunc:
 	return (0);
