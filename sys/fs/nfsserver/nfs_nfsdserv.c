@@ -4797,13 +4797,13 @@ nfsrvd_getextattr(struct nfsrv_descript *nd, __unused int isdgram,
 	auio.uio_segflg = UIO_SYSSPACE;
 	auio.uio_td = NULL;     
 	auio.uio_resid = len;
-	memset(attrval, 'X', len);
-        attrval[255] = '\0';
+
+        bzero(attrval, sizeof(attrval));
 
 	NFSVOPUNLOCK(vp, 0);
 	nfsvno_getextattr(vp, nd->nd_cred, p, attr, uiop, NULL);
 
-	nfsm_strtom(nd, attrval, aiov.iov_len - auio.uio_resid);
+	nfsm_strtom(nd, attrval, len - auio.uio_resid);
 
 nfsmout:
 	nd->nd_repstat = NFSERR_OK;
@@ -4828,19 +4828,17 @@ nfsrvd_setextattr(struct nfsrv_descript *nd, __unused int isdgram,
 
 	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
 	sxa_option = fxdr_unsigned(uint32_t, *tl);
-printf("option=%d\n", sxa_option);
 
 	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
-	nfsrv_mtostr(nd, attr, 255);
-	attr[255] = '\0';
-printf("attr=%s<<\n", attr);
+	len = fxdr_unsigned(uint32_t, *tl);
+	nfsrv_mtostr(nd, attr, len <= 255 ? len : 255);
+	attr[len <= 255 ? len : 255] = '\0';
 
 	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
-	nfsrv_mtostr(nd, attrval, 255);
-	attrval[255] = '\0';
-printf("attrval=%s<<\n", attrval);
+	len = fxdr_unsigned(uint32_t, *tl);
+	nfsrv_mtostr(nd, attrval, len <= 255 ? len : 255);
+	attrval[len <= 255 ? len : 255] = '\0';
 	len = strlen(attrval);
-printf("len=%d!!\n", len);
 
         aiov.iov_base = attrval;
         aiov.iov_len = len;
@@ -4848,10 +4846,9 @@ printf("len=%d!!\n", len);
         auio.uio_iovcnt = 1;
         auio.uio_offset = 0;
         auio.uio_resid = len;
-        auio.uio_rw = UIO_READ | UIO_WRITE;
-        auio.uio_segflg = UIO_USERSPACE;
+        auio.uio_rw = UIO_WRITE;
+        auio.uio_segflg = UIO_SYSSPACE;
         auio.uio_td = p;
-printf("after!!\n");
 
 	NFSVOPUNLOCK(vp, 0);
 	nfsvno_setextattr(vp, nd->nd_cred, p, attr, &auio);
