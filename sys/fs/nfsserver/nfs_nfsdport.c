@@ -3667,6 +3667,44 @@ nfsvno_testexp(struct nfsrv_descript *nd, struct nfsexstuff *exp)
 	return (1);
 }
 
+// RFC 8276
+int
+nfsvno_getextattr(struct vnode *vp, struct ucred *cred,
+    struct thread *p, const char *attr, struct uio *uiop, size_t *size)
+{
+	int error;
+
+	error = VOP_GETEXTATTR(vp, EXTATTR_NAMESPACE_USER, attr, uiop, size,
+			       cred, p);
+
+	return (error);
+}
+
+int
+nfsvno_setextattr(struct vnode *vp, struct ucred *cred,
+    struct thread *p, const char *attr, struct uio *uiop)
+{
+	int error;
+
+	error = VOP_SETEXTATTR(vp, EXTATTR_NAMESPACE_USER, attr, uiop, cred, p);
+
+	return (error);
+}
+
+int
+nfsvno_deleteextattr(struct vnode *vp, struct ucred *cred,
+    struct thread *p, const char *attr)
+{
+	int error;
+
+	error = VOP_DELETEEXTATTR(vp, EXTATTR_NAMESPACE_USER, attr, cred, p);
+	if (error == EOPNOTSUPP)
+		error = VOP_SETEXTATTR(vp, EXTATTR_NAMESPACE_USER, attr,
+				       NULL, cred, p);
+
+	return (error);
+}
+
 /*
  * Calculate a hash value for the fid in a file handle.
  */

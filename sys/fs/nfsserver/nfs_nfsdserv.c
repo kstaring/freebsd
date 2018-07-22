@@ -4768,3 +4768,133 @@ nfsrvd_notsupp(struct nfsrv_descript *nd, __unused int isdgram,
 	return (0);
 }
 
+// RFC 8276
+/*
+ * get extended attribute
+ */
+APPLESTATIC int
+nfsrvd_getextattr(struct nfsrv_descript *nd, __unused int isdgram,
+    vnode_t vp, NFSPROC_T *p, struct nfsexstuff *exp)
+{
+	char attr[256];
+	u_int32_t *tl;
+	ssize_t len = 255;
+	char attrval[256];
+	struct uio auio, *uiop = &auio;
+	struct iovec aiov;
+	int error = 0;
+ 
+	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+	nfsrv_mtostr(nd, attr, 255);
+	attr[255] = '\0';
+
+	aiov.iov_base = attrval;
+	aiov.iov_len = len;
+	auio.uio_iov = &aiov;
+	auio.uio_iovcnt = 1;
+	auio.uio_offset = 0;
+	auio.uio_rw = UIO_READ;
+	auio.uio_segflg = UIO_SYSSPACE;
+	auio.uio_td = NULL;     
+	auio.uio_resid = len;
+	memset(attrval, 'X', len);
+        attrval[255] = '\0';
+
+	NFSVOPUNLOCK(vp, 0);
+	nfsvno_getextattr(vp, nd->nd_cred, p, attr, uiop, NULL);
+
+	nfsm_strtom(nd, attrval, aiov.iov_len - auio.uio_resid);
+
+nfsmout:
+	nd->nd_repstat = NFSERR_OK;
+	NFSEXITCODE2(0, nd);
+	return (0);
+}
+
+/*
+ * set extended attribute
+ */
+APPLESTATIC int
+nfsrvd_setextattr(struct nfsrv_descript *nd, __unused int isdgram,
+    vnode_t vp, NFSPROC_T *p, struct nfsexstuff *exp)
+{
+	char attr[256];
+	char attrval[256];
+	struct uio auio;
+	struct iovec aiov;
+	u_int32_t *tl;
+	u_int32_t sxa_option, len;
+	int error = 0;
+
+	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+	sxa_option = fxdr_unsigned(uint32_t, *tl);
+printf("option=%d\n", sxa_option);
+
+	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+	nfsrv_mtostr(nd, attr, 255);
+	attr[255] = '\0';
+printf("attr=%s<<\n", attr);
+
+	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+	nfsrv_mtostr(nd, attrval, 255);
+	attrval[255] = '\0';
+printf("attrval=%s<<\n", attrval);
+	len = strlen(attrval);
+printf("len=%d!!\n", len);
+
+        aiov.iov_base = attrval;
+        aiov.iov_len = len;
+        auio.uio_iov = &aiov;
+        auio.uio_iovcnt = 1;
+        auio.uio_offset = 0;
+        auio.uio_resid = len;
+        auio.uio_rw = UIO_READ | UIO_WRITE;
+        auio.uio_segflg = UIO_USERSPACE;
+        auio.uio_td = p;
+printf("after!!\n");
+
+	NFSVOPUNLOCK(vp, 0);
+	nfsvno_setextattr(vp, nd->nd_cred, p, attr, &auio);
+
+nfsmout:
+	nd->nd_repstat = NFSERR_OK;
+	NFSEXITCODE2(0, nd);
+	return (0);
+}
+
+/*
+ * list extended attribute
+ */
+APPLESTATIC int
+nfsrvd_listextattr(struct nfsrv_descript *nd, __unused int isdgram,
+    vnode_t vp, NFSPROC_T *p, struct nfsexstuff *exp)
+{
+printf("called nfsrvd_listextattr!!\n");
+	nd->nd_repstat = NFSERR_NOTSUPP;
+	NFSEXITCODE2(0, nd);
+	return (0);
+}
+
+/*
+ * delete extended attribute
+ */
+APPLESTATIC int
+nfsrvd_deleteextattr(struct nfsrv_descript *nd, __unused int isdgram,
+    vnode_t vp, NFSPROC_T *p, struct nfsexstuff *exp)
+{
+	char attr[256];
+	u_int32_t *tl;
+	int error = 0;
+
+	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+	nfsrv_mtostr(nd, attr, 255);
+	attr[255] = '\0';
+
+	NFSVOPUNLOCK(vp, 0);
+	nfsvno_deleteextattr(vp, nd->nd_cred, p, attr);
+
+nfsmout:
+	nd->nd_repstat = NFSERR_OK;
+	NFSEXITCODE2(0, nd);
+	return (0);
+}

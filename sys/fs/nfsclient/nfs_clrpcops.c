@@ -7633,3 +7633,113 @@ nfsrpc_layoutgetres(struct nfsmount *nmp, vnode_t vp, uint8_t *newfhp,
 	return (laystat);
 }
 
+APPLESTATIC int
+nfsrpc_getextattr(vnode_t vp, const char *attr, struct uio *uiop, size_t *size,
+    struct ucred *cred, NFSPROC_T *p, struct nfsvattr *nap, int *attrflagp)
+{
+	int error;
+	struct nfsrv_descript nfsd, *nd = &nfsd;
+	struct nfsnode *np;
+	u_int32_t *tl;
+	u_int32_t len = 0;
+
+	np = VTONFS(vp);
+
+	NFSCL_REQSTART(nd, NFSPROC_GETXATTR, vp);
+
+	nfsm_strtom(nd, attr, strlen(attr));
+
+	if ((error = nfscl_request(nd, vp, p, cred, NULL)) != 0)
+		return (error);
+
+	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+	if ((len = fxdr_unsigned(int, *tl++)) > 0) {
+		if (uiop != NULL)
+			nfsm_mbufuio(nd, uiop, len);
+		if (size != NULL)
+			*size = len;
+	}
+
+nfsmout:
+	return (error);
+}
+
+APPLESTATIC int
+nfsrpc_setextattr(vnode_t vp, const char *attr, struct uio *uiop,
+    struct ucred *cred, NFSPROC_T *p, struct nfsvattr *nap, int *attrflagp)
+{
+	u_int32_t *tl;
+	int error;
+	ssize_t len;
+	struct nfsrv_descript nfsd, *nd = &nfsd;
+	struct nfsnode *np;
+	char attrval[256];
+
+	if (uiop->uio_resid > 255)
+		return (EFBIG);
+	len = uiop->uio_resid;
+	uiomove(attrval, len, uiop);
+	attrval[len] = '\0';
+
+	np = VTONFS(vp);
+
+	NFSCL_REQSTART(nd, NFSPROC_SETXATTR, vp);
+
+	NFSM_BUILD(tl, u_int32_t *, NFSX_UNSIGNED);
+	*tl++ = txdr_unsigned(SETXATTR4_EITHER);
+
+	nfsm_strtom(nd, attr, strlen(attr));
+	nfsm_strtom(nd, attrval, len);
+
+	error = nfscl_request(nd, vp, p, cred, NULL);
+
+	return (error);
+}
+
+APPLESTATIC int
+nfsrpc_listextattr(vnode_t vp, struct ucred *cred,
+    NFSPROC_T *p, struct nfsvattr *nap, int *attrflagp)
+{
+	u_int32_t *tl;
+	int error;
+	struct nfsrv_descript nfsd, *nd = &nfsd;
+	struct nfsnode *np;
+	nfsquad_t cookie;
+	u_int32_t count;
+
+	np = VTONFS(vp);
+
+	NFSCL_REQSTART(nd, NFSPROC_LISTXATTR, vp);
+
+	cookie.lval[0] = 0x010203;
+	cookie.lval[1] = 0x040506;
+	count = 10;
+
+	NFSM_BUILD(tl, u_int32_t *, 3 * NFSX_UNSIGNED);
+	*tl++ = txdr_unsigned(cookie.lval[0]);
+	*tl++ = txdr_unsigned(cookie.lval[1]);
+	*tl = txdr_unsigned(count);
+
+	error = nfscl_request(nd, vp, p, cred, NULL);
+
+	return (error);
+}
+
+APPLESTATIC int
+nfsrpc_deleteextattr(vnode_t vp, const char *attr, struct ucred *cred,   
+    NFSPROC_T *p, struct nfsvattr *nap, int *attrflagp)
+{
+	int error;
+	struct nfsrv_descript nfsd, *nd = &nfsd;
+	struct nfsnode *np;
+
+	np = VTONFS(vp);
+
+	NFSCL_REQSTART(nd, NFSPROC_REMOVEXATTR, vp);
+
+	nfsm_strtom(nd, attr, strlen(attr));
+
+	error = nfscl_request(nd, vp, p, cred, NULL);
+
+	return (error);
+}

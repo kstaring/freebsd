@@ -376,6 +376,15 @@
 #define	NFS_NPROCS		NFSV4_NPROCS
 #endif
 
+// RFC 8276
+#define NFSPROC_GETXATTR        72
+#define NFSPROC_SETXATTR        73
+#define NFSPROC_LISTXATTR       74
+#define NFSPROC_REMOVEXATTR     75
+
+#define NFS41_XATTR_NPROCS	76
+
+
 /*
  * NFSPROC_NOOP is a fake op# that can't be the same as any V2/3/4 Procedure
  * or Operation#. Since the NFS V4 Op #s go higher, use NFSV42_NOPS, which
