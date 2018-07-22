@@ -4785,9 +4785,11 @@ nfsrvd_getextattr(struct nfsrv_descript *nd, __unused int isdgram,
 	int error = 0;
  
 	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
-	nfsrv_mtostr(nd, attr, 255);
-	attr[255] = '\0';
+	len = fxdr_unsigned(uint32_t, *tl);
+	nfsrv_mtostr(nd, attr, len);
+	attr[len] = '\0';
 
+	len = 255;
 	aiov.iov_base = attrval;
 	aiov.iov_len = len;
 	auio.uio_iov = &aiov;
@@ -4801,7 +4803,7 @@ nfsrvd_getextattr(struct nfsrv_descript *nd, __unused int isdgram,
         bzero(attrval, sizeof(attrval));
 
 	NFSVOPUNLOCK(vp, 0);
-	nfsvno_getextattr(vp, nd->nd_cred, p, attr, uiop, NULL);
+	printf("resu=%d\n", nfsvno_getextattr(vp, nd->nd_cred, p, attr, uiop, NULL));
 
 	nfsm_strtom(nd, attrval, len - auio.uio_resid);
 
@@ -4866,7 +4868,6 @@ APPLESTATIC int
 nfsrvd_listextattr(struct nfsrv_descript *nd, __unused int isdgram,
     vnode_t vp, NFSPROC_T *p, struct nfsexstuff *exp)
 {
-printf("called nfsrvd_listextattr!!\n");
 	nd->nd_repstat = NFSERR_NOTSUPP;
 	NFSEXITCODE2(0, nd);
 	return (0);
@@ -4881,11 +4882,13 @@ nfsrvd_deleteextattr(struct nfsrv_descript *nd, __unused int isdgram,
 {
 	char attr[256];
 	u_int32_t *tl;
+	u_int32_t len;
 	int error = 0;
 
 	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
-	nfsrv_mtostr(nd, attr, 255);
-	attr[255] = '\0';
+	len = fxdr_unsigned(uint32_t, *tl);
+	nfsrv_mtostr(nd, attr, len);
+	attr[len] = '\0';
 
 	NFSVOPUNLOCK(vp, 0);
 	nfsvno_deleteextattr(vp, nd->nd_cred, p, attr);
