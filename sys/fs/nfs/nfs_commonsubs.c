@@ -106,7 +106,7 @@ SYSCTL_INT(_vfs_nfs, OID_AUTO, pnfsmirror, CTLFLAG_RD,
  * non-idempotent Ops.
  * Define it here, since it is used by both the client and server.
  */
-struct nfsv4_opflag nfsv4_opflag[NFSV41_NOPS] = {
+struct nfsv4_opflag nfsv4_opflag[NFSV42_WITH_XATTR_NOPS] = {
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
@@ -166,6 +166,25 @@ struct nfsv4_opflag nfsv4_opflag[NFSV41_NOPS] = {
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* Want Delegation */
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 0, 0 },		/* Destroy ClientID */
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 0 },		/* Reclaim Complete */
+
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+
+	{ 0, 1, 1, 1, LK_EXCLUSIVE, 1, 1 },		/* Get XAttr */
+	{ 0, 1, 1, 1, LK_EXCLUSIVE, 1, 1 },		/* Set XAttr */
+	{ 0, 1, 1, 1, LK_EXCLUSIVE, 1, 1 },		/* List XAttrs */
+	{ 0, 1, 1, 1, LK_EXCLUSIVE, 1, 1 },		/* Remove XAttr */
 };
 #endif	/* !APPLEKEXT */
 
@@ -190,9 +209,9 @@ static struct nfsrv_lughash	*nfsgroupnamehash;
  * marked 0 in this array, the code will still work, just not quite as
  * efficiently.)
  */
-static int nfs_bigreply[NFSV41_NPROCS] = { 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0,
+static int nfs_bigreply[NFSV42_WITH_XATTR_NOPS] = { 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 };
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0 };
 
 /* local functions */
 static int nfsrv_skipace(struct nfsrv_descript *nd, int *acesizep);
@@ -267,19 +286,36 @@ static struct {
 	{ NFSV4OP_COMMIT, 1, "CommitDS", 8, },
 	{ NFSV4OP_OPEN, 3, "OpenLayoutGet", 13, },
 	{ NFSV4OP_OPEN, 8, "CreateLayGet", 12, },
-	{ NFSV4OP_GETXATTR, 2, "GetXAttr", 8, },
-	{ NFSV4OP_SETXATTR, 2, "SetXAttr", 8, },
-	{ NFSV4OP_LISTXATTR, 2, "ListXAttr", 9, },
-	{ NFSV4OP_REMOVEXATTR, 2, "RemoveXAttr", 11, },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ NFSV4OP_GETXATTR, 1, "GetXAttr", 8, },
+	{ NFSV4OP_SETXATTR, 1, "SetXAttr", 8, },
+	{ NFSV4OP_LISTXATTR, 1, "ListXAttr", 9, },
+	{ NFSV4OP_REMOVEXATTR, 1, "RemoveXAttr", 11, },
 };
 
 /*
  * NFS RPCS that have large request message size.
  */
-static int nfs_bigrequest[NFSV41_NPROCS] = {
+static int nfs_bigrequest[NFS41_XATTR_NPROCS] = {
 	0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0
+	0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 1, 0, 0, 1
 };
 
 /*

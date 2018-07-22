@@ -280,6 +280,15 @@ int nfsrvd_teststateid(struct nfsrv_descript *, int,
     vnode_t, NFSPROC_T *, struct nfsexstuff *);
 int nfsrvd_notsupp(struct nfsrv_descript *, int,
     vnode_t, NFSPROC_T *, struct nfsexstuff *);
+// RFC 8276
+int nfsrvd_getextattr(struct nfsrv_descript *, int,    
+    vnode_t, NFSPROC_T *, struct nfsexstuff *);
+int nfsrvd_setextattr(struct nfsrv_descript *, int,    
+    vnode_t, NFSPROC_T *, struct nfsexstuff *);
+int nfsrvd_listextattr(struct nfsrv_descript *, int,    
+    vnode_t, NFSPROC_T *, struct nfsexstuff *);
+int nfsrvd_deleteextattr(struct nfsrv_descript *, int,    
+    vnode_t, NFSPROC_T *, struct nfsexstuff *);
 
 /* nfs_nfsdsocket.c */
 void nfsrvd_rephead(struct nfsrv_descript *);
@@ -536,6 +545,16 @@ int nfscl_findlayoutforio(struct nfscllayout *, uint64_t, uint32_t,
     struct nfsclflayout **);
 void nfscl_freenfsclds(struct nfsclds *);
 
+// RFC 8276
+int nfsrpc_listextattr(vnode_t, struct ucred *,
+    NFSPROC_T *p, struct nfsvattr *nap, int *attrflagp);
+int nfsrpc_getextattr(vnode_t, const char *, struct uio *, size_t *,
+    struct ucred *, NFSPROC_T *, struct nfsvattr *, int *);
+int nfsrpc_setextattr(vnode_t, const char *, struct uio *,
+    struct ucred *, NFSPROC_T *, struct nfsvattr *, int *);
+int nfsrpc_deleteextattr(vnode_t, const char *, struct ucred *,
+    NFSPROC_T *, struct nfsvattr *, int *);
+
 /* nfs_clstate.c */
 int nfscl_open(vnode_t, u_int8_t *, int, u_int32_t, int,
     struct ucred *, NFSPROC_T *, struct nfsclowner **, struct nfsclopen **,
@@ -701,6 +720,15 @@ vnode_t nfsvno_getvp(fhandle_t *);
 int nfsvno_advlock(vnode_t, int, u_int64_t, u_int64_t, NFSPROC_T *);
 int nfsrv_v4rootexport(void *, struct ucred *, NFSPROC_T *);
 int nfsvno_testexp(struct nfsrv_descript *, struct nfsexstuff *);
+
+// RFC 8276
+int nfsvno_getextattr(struct vnode *, struct ucred *, struct thread *,
+    const char *, struct uio *, size_t *);
+int nfsvno_setextattr(struct vnode *, struct ucred *, struct thread *,
+    const char *, struct uio *);
+int nfsvno_deleteextattr(struct vnode *, struct ucred *, struct thread *,
+    const char *);
+
 uint32_t nfsrv_hashfh(fhandle_t *);
 uint32_t nfsrv_hashsessionid(uint8_t *);
 void nfsrv_backupstable(void);

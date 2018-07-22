@@ -137,7 +137,7 @@ int (*nfsrv3_procs2[NFS_V3NPROCS])(struct nfsrv_descript *,
 	(int (*)(struct nfsrv_descript *, int, vnode_t , vnode_t , NFSPROC_T *, struct nfsexstuff *, struct nfsexstuff *))0,
 };
 
-int (*nfsrv4_ops0[NFSV41_NOPS])(struct nfsrv_descript *,
+int (*nfsrv4_ops0[NFSV42_WITH_XATTR_NOPS])(struct nfsrv_descript *,
     int, vnode_t , NFSPROC_T *, struct nfsexstuff *) = {
 	(int (*)(struct nfsrv_descript *, int, vnode_t , NFSPROC_T *, struct nfsexstuff *))0,
 	(int (*)(struct nfsrv_descript *, int, vnode_t , NFSPROC_T *, struct nfsexstuff *))0,
@@ -198,9 +198,26 @@ int (*nfsrv4_ops0[NFSV41_NOPS])(struct nfsrv_descript *,
 	nfsrvd_notsupp,
 	nfsrvd_destroyclientid,
 	nfsrvd_reclaimcomplete,
+	NULL, /* 59 */
+	NULL, /* 60 */
+	NULL, /* 61 */
+	NULL, /* 62 */
+	NULL, /* 63 */
+	NULL, /* 64 */
+	NULL, /* 65 */
+	NULL, /* 66 */
+	NULL, /* 67 */
+	NULL, /* 68 */
+	NULL, /* 69 */
+	NULL, /* 70 */
+	NULL, /* 71 */
+	nfsrvd_getextattr,
+	nfsrvd_setextattr,
+	nfsrvd_listextattr,
+	nfsrvd_deleteextattr,
 };
 
-int (*nfsrv4_ops1[NFSV41_NOPS])(struct nfsrv_descript *,
+int (*nfsrv4_ops1[NFSV42_WITH_XATTR_NOPS])(struct nfsrv_descript *,
     int, vnode_t , vnode_t *, fhandle_t *,
     NFSPROC_T *, struct nfsexstuff *) = {
 	(int (*)(struct nfsrv_descript *, int, vnode_t , vnode_t *, fhandle_t *, NFSPROC_T *, struct nfsexstuff *))0,
@@ -262,9 +279,26 @@ int (*nfsrv4_ops1[NFSV41_NOPS])(struct nfsrv_descript *,
 	(int (*)(struct nfsrv_descript *, int, vnode_t , vnode_t *, fhandle_t *, NFSPROC_T *, struct nfsexstuff *))0,
 	(int (*)(struct nfsrv_descript *, int, vnode_t , vnode_t *, fhandle_t *, NFSPROC_T *, struct nfsexstuff *))0,
 	(int (*)(struct nfsrv_descript *, int, vnode_t , vnode_t *, fhandle_t *, NFSPROC_T *, struct nfsexstuff *))0,
+	NULL, /* 59 */
+	NULL, /* 60 */
+	NULL, /* 61 */
+	NULL, /* 62 */
+	NULL, /* 63 */
+	NULL, /* 64 */
+	NULL, /* 65 */
+	NULL, /* 66 */
+	NULL, /* 67 */
+	NULL, /* 68 */
+	NULL, /* 69 */
+	NULL, /* 70 */
+	NULL, /* 71 */
+	NULL, // nfsrvd_getextattr,
+	NULL, // nfsrvd_setextattr,
+	NULL, // nfsrvd_listextattr,
+	NULL, // nfsrvd_deleteextattr,
 };
 
-int (*nfsrv4_ops2[NFSV41_NOPS])(struct nfsrv_descript *,
+int (*nfsrv4_ops2[NFSV42_WITH_XATTR_NOPS])(struct nfsrv_descript *,
     int, vnode_t , vnode_t , NFSPROC_T *,
     struct nfsexstuff *, struct nfsexstuff *) = {
 	(int (*)(struct nfsrv_descript *, int, vnode_t , vnode_t , NFSPROC_T *, struct nfsexstuff *, struct nfsexstuff *))0,
@@ -326,6 +360,22 @@ int (*nfsrv4_ops2[NFSV41_NOPS])(struct nfsrv_descript *,
 	(int (*)(struct nfsrv_descript *, int, vnode_t , vnode_t , NFSPROC_T *, struct nfsexstuff *, struct nfsexstuff *))0,
 	(int (*)(struct nfsrv_descript *, int, vnode_t , vnode_t , NFSPROC_T *, struct nfsexstuff *, struct nfsexstuff *))0,
 	(int (*)(struct nfsrv_descript *, int, vnode_t , vnode_t , NFSPROC_T *, struct nfsexstuff *, struct nfsexstuff *))0,
+	NULL, /* 60 */
+	NULL, /* 61 */
+	NULL, /* 62 */
+	NULL, /* 63 */
+	NULL, /* 64 */
+	NULL, /* 65 */
+	NULL, /* 66 */
+	NULL, /* 67 */
+	NULL, /* 68 */
+	NULL, /* 69 */
+	NULL, /* 70 */
+	NULL, /* 71 */
+	NULL, // nfsrvd_getextattr,
+	NULL, // nfsrvd_setextattr,
+	NULL, // nfsrvd_listextattr,
+	NULL, // nfsrvd_deleteextattr,
 };
 #endif	/* !APPLEKEXT */
 
@@ -772,8 +822,10 @@ nfsrvd_compound(struct nfsrv_descript *nd, int isdgram, u_char *tag,
 		statsinprog = 1;
 
 		if (op < NFSV4OP_ACCESS ||
-		    (op >= NFSV4OP_NOPS && (nd->nd_flag & ND_NFSV41) == 0) ||
-		    (op >= NFSV41_NOPS && (nd->nd_flag & ND_NFSV41) != 0)) {
+		    (op >= NFSV4OP_NOPS && (nd->nd_flag & ND_NFSV4) == 0) ||
+		    ((nd->nd_flag & ND_NFSV4) &&
+			((op >= NFSV42_WITH_XATTR_NOPS) ||
+			 (op >= NFSV41_NOPS && op < NFSV4OP_GETXATTR)))) {
 			nd->nd_repstat = NFSERR_OPILLEGAL;
 			*repp++ = txdr_unsigned(NFSV4OP_OPILLEGAL);
 			*repp = nfsd_errmap(nd);
