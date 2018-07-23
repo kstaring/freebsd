@@ -3692,6 +3692,18 @@ nfsvno_setextattr(struct vnode *vp, struct ucred *cred,
 }
 
 int
+nfsvno_listextattr(struct vnode *vp, struct ucred *cred,
+    struct thread *p, struct uio *uiop, size_t *size)
+{
+	int error;
+
+	error = VOP_LISTEXTATTR(vp, EXTATTR_NAMESPACE_USER, uiop, size,
+			        cred, p);
+
+	return (error);
+}
+
+int
 nfsvno_deleteextattr(struct vnode *vp, struct ucred *cred,
     struct thread *p, const char *attr)
 {

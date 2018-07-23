@@ -7722,6 +7722,15 @@ nfsrpc_listextattr(vnode_t vp, struct ucred *cred,
 
 	error = nfscl_request(nd, vp, p, cred, NULL);
 
+	NFSM_DISSECT(tl, u_int32_t *, 2 * NFSX_UNSIGNED);
+	// cookie
+	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+	if ((len = fxdr_unsigned(int, *tl++)) > 0) { // array count
+		for (int i = 0; i < len; i++) {
+			
+		}
+	}
+
 	return (error);
 }
 

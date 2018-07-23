@@ -546,12 +546,12 @@ int nfscl_findlayoutforio(struct nfscllayout *, uint64_t, uint32_t,
 void nfscl_freenfsclds(struct nfsclds *);
 
 // RFC 8276
-int nfsrpc_listextattr(vnode_t, struct ucred *,
-    NFSPROC_T *p, struct nfsvattr *nap, int *attrflagp);
 int nfsrpc_getextattr(vnode_t, const char *, struct uio *, size_t *,
     struct ucred *, NFSPROC_T *, struct nfsvattr *, int *);
 int nfsrpc_setextattr(vnode_t, const char *, struct uio *,
     struct ucred *, NFSPROC_T *, struct nfsvattr *, int *);
+int nfsrpc_listextattr(vnode_t, struct ucred *,
+    NFSPROC_T *p, struct nfsvattr *nap, int *attrflagp);
 int nfsrpc_deleteextattr(vnode_t, const char *, struct ucred *,
     NFSPROC_T *, struct nfsvattr *, int *);
 
@@ -726,6 +726,8 @@ int nfsvno_getextattr(struct vnode *, struct ucred *, struct thread *,
     const char *, struct uio *, size_t *);
 int nfsvno_setextattr(struct vnode *, struct ucred *, struct thread *,
     const char *, struct uio *);
+int nfsvno_listextattr(struct vnode *, struct ucred *, struct thread *,
+    struct uio *, size_t *);
 int nfsvno_deleteextattr(struct vnode *, struct ucred *, struct thread *,
     const char *);
 

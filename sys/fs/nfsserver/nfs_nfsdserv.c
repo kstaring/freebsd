@@ -4780,7 +4780,7 @@ nfsrvd_getextattr(struct nfsrv_descript *nd, __unused int isdgram,
 	u_int32_t *tl;
 	ssize_t len = 255;
 	char attrval[256];
-	struct uio auio, *uiop = &auio;
+	struct uio auio;
 	struct iovec aiov;
 	int error = 0;
  
@@ -4803,7 +4803,6 @@ nfsrvd_getextattr(struct nfsrv_descript *nd, __unused int isdgram,
         bzero(attrval, sizeof(attrval));
 
 	NFSVOPUNLOCK(vp, 0);
-	printf("resu=%d\n", nfsvno_getextattr(vp, nd->nd_cred, p, attr, uiop, NULL));
 
 	nfsm_strtom(nd, attrval, len - auio.uio_resid);
 
@@ -4868,7 +4867,60 @@ APPLESTATIC int
 nfsrvd_listextattr(struct nfsrv_descript *nd, __unused int isdgram,
     vnode_t vp, NFSPROC_T *p, struct nfsexstuff *exp)
 {
-	nd->nd_repstat = NFSERR_NOTSUPP;
+	u_int32_t *tl;
+	nfsquad_t nfs_cookie;
+	u_int32_t count;
+	struct uio auio;
+	struct iovec aiov;
+	ssize_t bufsize;
+	char *attrbuf = NULL;
+	int attrcount = 0;
+	int error = 0;
+
+	NFSM_DISSECT(tl, u_int32_t *, 3 * NFSX_UNSIGNED);
+	nfs_cookie.lval[0] = fxdr_unsigned(uint32_t, *tl++);
+	nfs_cookie.lval[1] = fxdr_unsigned(uint32_t, *tl++);
+	count = fxdr_unsigned(uint32_t, *tl);
+
+	NFSVOPUNLOCK(vp, 0);
+	nfsvno_listextattr(vp, nd->nd_cred, p, NULL, &bufsize);
+	attrbuf = malloc(bufsize, M_TEMP, M_WAITOK);
+	bzero(attrbuf, bufsize);
+
+        aiov.iov_base = attrbuf;
+        aiov.iov_len = bufsize;
+        auio.uio_iov = &aiov;
+        auio.uio_iovcnt = 1;
+        auio.uio_offset = 0;
+        auio.uio_resid = bufsize;
+        auio.uio_rw = UIO_READ;
+        auio.uio_segflg = UIO_SYSSPACE;
+        auio.uio_td = p;
+
+	nfsvno_listextattr(vp, nd->nd_cred, p, &auio, NULL);
+
+        NFSM_BUILD(tl, u_int32_t *, 3 * NFSX_UNSIGNED);
+        *tl++ = txdr_unsigned(nfs_cookie.lval[0]);
+        *tl++ = txdr_unsigned(nfs_cookie.lval[1]);
+
+printf("->buf[0] = %hhd\n", attrbuf[0]);
+	for (int idx = 0; idx < bufsize; attrcount++) {
+		uint8_t size = attrbuf[idx];
+char buf[256];
+bcopy(attrbuf + idx + 1, buf, size);
+buf[size]  = '\0';
+printf("gotten %d = >%s<\n", attrcount, buf);
+		nfsm_strtom(nd, attrbuf + idx + 1, size);
+		idx += size + 1;
+	}
+	*tl = txdr_unsigned(attrcount);
+
+	NFSM_BUILD(tl, uint32_t *, NFSX_UNSIGNED);
+	*tl = txdr_unsigned(1); // lxr_eof
+
+nfsmout:
+	free(attrbuf, M_TEMP);
+	nd->nd_repstat = NFSERR_OK;
 	NFSEXITCODE2(0, nd);
 	return (0);
 }
