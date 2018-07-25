@@ -550,8 +550,8 @@ int nfsrpc_getextattr(vnode_t, const char *, struct uio *, size_t *,
     struct ucred *, NFSPROC_T *, struct nfsvattr *, int *);
 int nfsrpc_setextattr(vnode_t, const char *, struct uio *,
     struct ucred *, NFSPROC_T *, struct nfsvattr *, int *);
-int nfsrpc_listextattr(vnode_t, struct ucred *,
-    NFSPROC_T *p, struct nfsvattr *nap, int *attrflagp);
+int nfsrpc_listextattr(vnode_t, struct ucred *, NFSPROC_T *,
+    struct uio *, size_t *, struct nfsvattr *, int *);
 int nfsrpc_deleteextattr(vnode_t, const char *, struct ucred *,
     NFSPROC_T *, struct nfsvattr *, int *);
 

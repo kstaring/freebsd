@@ -4903,13 +4903,8 @@ nfsrvd_listextattr(struct nfsrv_descript *nd, __unused int isdgram,
         *tl++ = txdr_unsigned(nfs_cookie.lval[0]);
         *tl++ = txdr_unsigned(nfs_cookie.lval[1]);
 
-printf("->buf[0] = %hhd\n", attrbuf[0]);
 	for (int idx = 0; idx < bufsize; attrcount++) {
 		uint8_t size = attrbuf[idx];
-char buf[256];
-bcopy(attrbuf + idx + 1, buf, size);
-buf[size]  = '\0';
-printf("gotten %d = >%s<\n", attrcount, buf);
 		nfsm_strtom(nd, attrbuf + idx + 1, size);
 		idx += size + 1;
 	}
