@@ -3591,7 +3591,7 @@ nfs_listextattr(struct vop_listextattr_args *ap)
 	struct thread *td = curthread;
 	int error = EOPNOTSUPP;
 
-	error = nfsrpc_listextattr(vp, ap->a_cred, td, NULL, NULL);
+	error = nfsrpc_listextattr(vp, ap->a_cred, td, ap->a_uio, ap->a_size, NULL, NULL);
 
 	return (error);
 }

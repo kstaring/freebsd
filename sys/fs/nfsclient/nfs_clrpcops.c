@@ -7697,15 +7697,20 @@ nfsrpc_setextattr(vnode_t vp, const char *attr, struct uio *uiop,
 }
 
 APPLESTATIC int
-nfsrpc_listextattr(vnode_t vp, struct ucred *cred,
-    NFSPROC_T *p, struct nfsvattr *nap, int *attrflagp)
+nfsrpc_listextattr(vnode_t vp, struct ucred *cred, NFSPROC_T *p,
+    struct uio *auio, size_t *size, struct nfsvattr *nap, int *attrflagp)
 {
+	char *buf;
+	char tmpbuf[256];
 	u_int32_t *tl;
 	int error;
 	struct nfsrv_descript nfsd, *nd = &nfsd;
 	struct nfsnode *np;
+	size_t total_size;
 	nfsquad_t cookie;
+	u_int32_t maxlen;
 	u_int32_t count;
+	u_int32_t len;
 
 	np = VTONFS(vp);
 
@@ -7722,6 +7727,42 @@ nfsrpc_listextattr(vnode_t vp, struct ucred *cred,
 
 	error = nfscl_request(nd, vp, p, cred, NULL);
 
+	NFSM_DISSECT(tl, u_int32_t *, 2 * NFSX_UNSIGNED);
+        cookie.lval[0] = fxdr_unsigned(u_int32_t, *tl++);
+        cookie.lval[1] = fxdr_unsigned(u_int32_t, *tl++);
+
+	total_size = 0;
+	NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+	if ((count = fxdr_unsigned(u_int32_t, *tl++)) > 0) { // array count
+		if (auio != NULL) {
+			buf = auio->uio_iov->iov_base;
+			maxlen = auio->uio_iov->iov_len;
+		}
+		for (int i = 0; i < count; i++) {
+			NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+			len = fxdr_unsigned(u_int32_t, *tl);
+			if (len > 255) {
+				printf("ERR: len %d > 255!\n", len);
+				goto nfsmout;
+			}
+			if (auio != NULL && total_size + len + 1 <= maxlen) {
+				buf[total_size] = (u_int8_t)len;
+				nfsrv_mtostr(nd, buf + total_size + 1, len);
+			} else {
+				nfsrv_mtostr(nd, tmpbuf, len);
+			}
+			total_size += len + 1;
+		}
+	}
+
+	if (size != NULL)
+		*size = total_size;
+	if (auio != NULL) {
+		auio->uio_resid -= total_size;
+		auio->uio_offset = total_size;
+	}
+
+nfsmout:
 	return (error);
 }
 
