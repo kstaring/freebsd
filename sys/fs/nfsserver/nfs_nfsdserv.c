@@ -4803,6 +4803,7 @@ nfsrvd_getextattr(struct nfsrv_descript *nd, __unused int isdgram,
         bzero(attrval, sizeof(attrval));
 
 	NFSVOPUNLOCK(vp, 0);
+	nfsvno_getextattr(vp, nd->nd_cred, p, attr, &auio, NULL);
 
 	nfsm_strtom(nd, attrval, len - auio.uio_resid);
 
