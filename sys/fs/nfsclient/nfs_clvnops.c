@@ -144,6 +144,12 @@ static vop_getacl_t nfs_getacl;
 static vop_setacl_t nfs_setacl;
 static vop_set_text_t nfs_set_text;
 
+// RFC 8276
+static vop_listextattr_t nfs_listextattr;
+static vop_deleteextattr_t nfs_deleteextattr;
+static vop_getextattr_t nfs_getextattr;
+static vop_setextattr_t nfs_setextattr;
+
 /*
  * Global vfs data structures for nfs
  */
@@ -154,12 +160,15 @@ struct vop_vector newnfs_vnodeops = {
 	.vop_advlockasync =	nfs_advlockasync,
 	.vop_close =		nfs_close,
 	.vop_create =		nfs_create,
+	.vop_deleteextattr =	nfs_deleteextattr,
 	.vop_fsync =		nfs_fsync,
 	.vop_getattr =		nfs_getattr,
+	.vop_getextattr =	nfs_getextattr,
 	.vop_getpages =		ncl_getpages,
 	.vop_putpages =		ncl_putpages,
 	.vop_inactive =		ncl_inactive,
 	.vop_link =		nfs_link,
+	.vop_listextattr =	nfs_listextattr,
 	.vop_lookup =		nfs_lookup,
 	.vop_mkdir =		nfs_mkdir,
 	.vop_mknod =		nfs_mknod,
@@ -174,6 +183,7 @@ struct vop_vector newnfs_vnodeops = {
 	.vop_rename =		nfs_rename,
 	.vop_rmdir =		nfs_rmdir,
 	.vop_setattr =		nfs_setattr,
+	.vop_setextattr =	nfs_setextattr,
 	.vop_strategy =		nfs_strategy,
 	.vop_symlink =		nfs_symlink,
 	.vop_write =		ncl_write,
@@ -3536,6 +3546,67 @@ nfs_pathconf(struct vop_pathconf_args *ap)
 		error = vop_stdpathconf(ap);
 		break;
 	}
+	return (error);
+}
+
+/*
+ * get extended attributes
+ */
+static int
+nfs_getextattr(struct vop_getextattr_args *ap)
+{
+	struct vnode *vp = ap->a_vp;
+	struct thread *td = curthread;
+	int error = EOPNOTSUPP;
+
+	error = nfsrpc_getextattr(vp, ap->a_name, ap->a_uio, ap->a_size,
+				  ap->a_cred, td, NULL, NULL);
+
+	return (error);
+}
+
+/*
+ * set extended attribute
+ */
+static int
+nfs_setextattr(struct vop_setextattr_args *ap)
+{
+	struct vnode *vp = ap->a_vp;
+	struct thread *td = curthread;
+	int error = EOPNOTSUPP;
+
+	error = nfsrpc_setextattr(vp, ap->a_name, ap->a_uio, ap->a_cred, td, NULL, NULL);
+
+	return (error);
+
+}
+
+/*
+ * list extended attributes
+ */
+static int
+nfs_listextattr(struct vop_listextattr_args *ap)
+{
+	struct vnode *vp = ap->a_vp;
+	struct thread *td = curthread;
+	int error = EOPNOTSUPP;
+
+	error = nfsrpc_listextattr(vp, ap->a_cred, td, ap->a_uio, ap->a_size, NULL, NULL);
+
+	return (error);
+}
+
+/*
+ * delete extended attributes
+ */
+static int
+nfs_deleteextattr(struct vop_deleteextattr_args *ap)
+{
+	struct vnode *vp = ap->a_vp;
+	struct thread *td = curthread;
+	int error = EOPNOTSUPP;
+
+	error = nfsrpc_deleteextattr(vp, ap->a_name, ap->a_cred, td, NULL, NULL);
 	return (error);
 }
 

@@ -213,6 +213,9 @@
 #define	NFSERR_REJECTDELEG	10085
 #define	NFSERR_RETURNCONFLICT	10086
 #define	NFSERR_DELEGREVOKED	10087
+// RFC 8276
+#define	NFSERR_NOXATTR		10095	/* xattr does not exist */
+#define	NFSERR_NOXATTR2BIG	10096	/* xattr value is too big */
 
 #define	NFSERR_STALEWRITEVERF	30001	/* Fake return for nfs_commit() */
 #define	NFSERR_DONTREPLY	30003	/* Don't process request */
@@ -372,6 +375,15 @@
 #ifndef	NFS_NPROCS
 #define	NFS_NPROCS		NFSV4_NPROCS
 #endif
+
+// RFC 8276
+#define NFSPROC_GETXATTR        72
+#define NFSPROC_SETXATTR        73
+#define NFSPROC_LISTXATTR       74
+#define NFSPROC_REMOVEXATTR     75
+
+#define NFS41_XATTR_NPROCS	76
+
 
 /*
  * NFSPROC_NOOP is a fake op# that can't be the same as any V2/3/4 Procedure
@@ -592,6 +604,10 @@
 #define	NFSACCESS_EXTEND		0x08
 #define	NFSACCESS_DELETE		0x10
 #define	NFSACCESS_EXECUTE		0x20
+// RFC 8276
+#define	NFSACCESS_XAREAD		0x40
+#define	NFSACCESS_XAWRITE		0x80
+#define	NFSACCESS_XALIST		0x100
 
 #define	NFSWRITE_UNSTABLE		0
 #define	NFSWRITE_DATASYNC		1
@@ -919,6 +935,8 @@ struct nfsv3_sattr {
 #define	NFSATTRBIT_MODESETMASKED	74
 #define	NFSATTRBIT_SUPPATTREXCLCREAT	75
 #define	NFSATTRBIT_FSCHARSETCAP		76
+// RFC 8276
+#define	NFSATTRBIT_XATTR_SUPPORT	82
 
 #define	NFSATTRBM_SUPPORTEDATTRS	0x00000001
 #define	NFSATTRBM_TYPE			0x00000002
@@ -998,7 +1016,7 @@ struct nfsv3_sattr {
 #define	NFSATTRBM_SUPPATTREXCLCREAT	0x00000800
 #define	NFSATTRBM_FSCHARSETCAP		0x00001000
 
-#define	NFSATTRBIT_MAX			77
+#define	NFSATTRBIT_MAX			83
 
 /*
  * Sets of attributes that are supported, by words in the bitmap.
@@ -1388,6 +1406,7 @@ struct nfsv3_pathconf {
 	u_int32_t pc_chownrestricted;
 	u_int32_t pc_caseinsensitive;
 	u_int32_t pc_casepreserving;
+	u_int32_t pc_extattrsupport;
 };
 
 /*

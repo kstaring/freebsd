@@ -435,4 +435,5 @@ struct nfsv3_pathconf {
 	uint32_t pc_chownrestricted;
 	uint32_t pc_caseinsensitive;
 	uint32_t pc_casepreserving;
+	uint32_t pc_extattrsupport;
 };

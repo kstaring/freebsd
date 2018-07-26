@@ -279,6 +279,11 @@
 #define NFSV4OP_SETCLIENTID_CONFIRM 36
 #define NFSV4OP_VERIFY		37
 #define NFSV4OP_WRITE		38
+// RFC 8276
+#define NFSV4OP_GETXATTR	72
+#define NFSV4OP_SETXATTR	73
+#define NFSV4OP_LISTXATTRS	74
+#define NFSV4OP_REMOVEXATTR	75
 
 /*
  * Constants used by the Version 3 protocol for various RPCs

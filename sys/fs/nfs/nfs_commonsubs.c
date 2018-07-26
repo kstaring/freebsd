@@ -106,7 +106,7 @@ SYSCTL_INT(_vfs_nfs, OID_AUTO, pnfsmirror, CTLFLAG_RD,
  * non-idempotent Ops.
  * Define it here, since it is used by both the client and server.
  */
-struct nfsv4_opflag nfsv4_opflag[NFSV41_NOPS] = {
+struct nfsv4_opflag nfsv4_opflag[NFSV42_WITH_XATTR_NOPS] = {
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
@@ -166,6 +166,25 @@ struct nfsv4_opflag nfsv4_opflag[NFSV41_NOPS] = {
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* Want Delegation */
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 0, 0 },		/* Destroy ClientID */
 	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 0 },		/* Reclaim Complete */
+
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+	{ 0, 0, 0, 0, LK_EXCLUSIVE, 1, 1 },		/* undef */
+
+	{ 0, 1, 1, 1, LK_EXCLUSIVE, 1, 1 },		/* Get XAttr */
+	{ 0, 1, 1, 1, LK_EXCLUSIVE, 1, 1 },		/* Set XAttr */
+	{ 0, 1, 1, 1, LK_EXCLUSIVE, 1, 1 },		/* List XAttrs */
+	{ 0, 1, 1, 1, LK_EXCLUSIVE, 1, 1 },		/* Remove XAttr */
 };
 #endif	/* !APPLEKEXT */
 
@@ -190,9 +209,9 @@ static struct nfsrv_lughash	*nfsgroupnamehash;
  * marked 0 in this array, the code will still work, just not quite as
  * efficiently.)
  */
-static int nfs_bigreply[NFSV41_NPROCS] = { 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0,
+static int nfs_bigreply[NFSV42_WITH_XATTR_NOPS] = { 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 };
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0 };
 
 /* local functions */
 static int nfsrv_skipace(struct nfsrv_descript *nd, int *acesizep);
@@ -210,7 +229,7 @@ static struct {
 	int	opcnt;
 	const u_char *tag;
 	int	taglen;
-} nfsv4_opmap[NFSV41_NPROCS] = {
+} nfsv4_opmap[NFSV41_PLUS_XATTR_NPROCS] = {
 	{ 0, 1, "Null", 4 },
 	{ NFSV4OP_GETATTR, 1, "Getattr", 7, },
 	{ NFSV4OP_SETATTR, 2, "Setattr", 7, },
@@ -267,15 +286,36 @@ static struct {
 	{ NFSV4OP_COMMIT, 1, "CommitDS", 8, },
 	{ NFSV4OP_OPEN, 3, "OpenLayoutGet", 13, },
 	{ NFSV4OP_OPEN, 8, "CreateLayGet", 12, },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ 0, 1, "Null", 4 },
+	{ NFSV4OP_GETXATTR, 1, "GetXAttr", 8, },
+	{ NFSV4OP_SETXATTR, 1, "SetXAttr", 8, },
+	{ NFSV4OP_LISTXATTR, 1, "ListXAttr", 9, },
+	{ NFSV4OP_REMOVEXATTR, 1, "RemoveXAttr", 11, },
 };
 
 /*
  * NFS RPCS that have large request message size.
  */
-static int nfs_bigrequest[NFSV41_NPROCS] = {
+static int nfs_bigrequest[NFS41_XATTR_NPROCS] = {
 	0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0
+	0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 1, 0, 0, 1
 };
 
 /*
@@ -1255,6 +1295,7 @@ nfsv4_loadattr(struct nfsrv_descript *nd, vnode_t vp,
 			pc->pc_chownrestricted = 0;
 			pc->pc_caseinsensitive = 0;
 			pc->pc_casepreserving = 1;
+			pc->pc_extattrsupport = 1;
 		}
 		if (sfp != NULL) {
 			sfp->sf_ffiles = UINT64_MAX;
@@ -2169,6 +2210,19 @@ nfsv4_loadattr(struct nfsrv_descript *nd, vnode_t vp,
 			if (compare && !(*retcmpp) && i != NFS_SRVMAXIO)
 				*retcmpp = NFSERR_NOTSAME;
 			break;
+		case NFSATTRBIT_XATTR_SUPPORT:
+			NFSM_DISSECT(tl, u_int32_t *, NFSX_UNSIGNED);
+			if (compare) {
+				if (!(*retcmpp)) {
+				    if (*tl != newnfs_true)
+					*retcmpp = NFSERR_NOTSAME;
+				}
+			} else if (pc != NULL) {
+				pc->pc_extattrsupport =
+				    fxdr_unsigned(u_int32_t, *tl);
+			}
+			attrsum += NFSX_UNSIGNED;
+			break;
 		default:
 			printf("EEK! nfsv4_loadattr unknown attr=%d\n",
 				bitpos);
@@ -2963,8 +3017,20 @@ nfsv4_fillattr(struct nfsrv_descript *nd, struct mount *mp, vnode_t vp,
 			*tl = txdr_unsigned(NFS_SRVMAXIO);
 			retnum += NFSX_UNSIGNED;
 			break;
+		case NFSATTRBIT_XATTR_SUPPORT:
+			NFSM_BUILD(tl, u_int32_t *, NFSX_UNSIGNED);
+			*tl = newnfs_true;
+			retnum += NFSX_UNSIGNED;
+			break;
 		default:
-			printf("EEK! Bad V4 attribute bitpos=%d\n", bitpos);
+			// warn about unrecognized bitpos, but take care
+			// of gap between NFSATTRBIT_FSCHARSETCAP and
+			// NFSATTRBIT_XATTR_SUPPORT which remains
+			// unimplemented.
+			if (bitpos < NFSATTRBIT_FSCHARSETCAP ||
+			    bitpos > NFSATTRBIT_XATTR_SUPPORT)
+				printf("EEK! Bad V4 attribute bitpos=%d\n",
+					bitpos);
 		}
 	    }
 	}
