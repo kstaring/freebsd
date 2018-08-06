@@ -347,12 +347,12 @@ i_procstates(int total, int *brkdn)
     procstates_buffer = setup_buffer(procstates_buffer, 0);
 
     /* write current number of processes and remember the value */
-    printf("%d %s:", total, (ps.thread) ? "threads" :"processes");
+    printf("%d %s:", total, ps.thread ? "threads" : "processes");
     ltotal = total;
 
     /* put out enough spaces to get to column 15 */
     i = digits(total);
-    while (i++ < 4)
+    while (i++ < (ps.thread ? 6 : 4))
     {
 	putchar(' ');
     }
@@ -389,10 +389,10 @@ else {
 	/* if number of digits differs, rewrite the label */
 	if (digits(total) != digits(ltotal))
 	{
-	    fputs(" processes:", stdout);
+	    printf(" %s:", ps.thread ? "threads" : "processes");
 	    /* put out enough spaces to get to column 15 */
 	    i = digits(total);
-	    while (i++ < 4)
+	    while (i++ < (ps.thread ? 6 : 4))
 	    {
 		putchar(' ');
 	    }
@@ -420,6 +420,7 @@ i_cpustates(int *states)
     int value;
     const char * const *names;
     const char *thisname;
+    int *hstates = states;
     int cpu;
 
 for (cpu = 0; cpu < num_cpus; cpu++) {
@@ -453,6 +454,7 @@ for (cpu = 0; cpu < num_cpus; cpu++) {
 }
 
     /* copy over values into "last" array */
+    states = hstates;
     memcpy(lcpustates, states, num_cpustates * sizeof(int) * num_cpus);
 }
 
@@ -462,6 +464,7 @@ u_cpustates(int *states)
     int value;
     const char * const *names;
     const char *thisname;
+    int *hstates = states;
     int *lp;
     int *colp;
     int cpu;
@@ -504,6 +507,8 @@ for (cpu = 0; cpu < num_cpus; cpu++) {
 	colp++;
     }
 }
+
+    states = hstates;
 }
 
 void

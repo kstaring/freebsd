@@ -3841,10 +3841,11 @@ get_params__post_init(struct adapter *sc)
 
 	sc->sge.iq_start = val[0];
 	sc->sge.eq_start = val[1];
-	sc->tids.ftid_base = val[2];
-	sc->tids.nftids = val[3] - val[2] + 1;
-	sc->params.ftid_min = val[2];
-	sc->params.ftid_max = val[3];
+	if (val[3] > val[2]) {
+		sc->tids.ftid_base = val[2];
+		sc->tids.ftid_end = val[3];
+		sc->tids.nftids = val[3] - val[2] + 1;
+	}
 	sc->vres.l2t.start = val[4];
 	sc->vres.l2t.size = val[5] - val[4] + 1;
 	KASSERT(sc->vres.l2t.size <= L2T_SIZE,
@@ -3928,12 +3929,13 @@ get_params__post_init(struct adapter *sc)
 			    "failed to query NIC parameters: %d.\n", rc);
 			return (rc);
 		}
-		sc->tids.etid_base = val[0];
-		sc->params.etid_min = val[0];
-		sc->params.etid_max = val[1];
-		sc->tids.netids = val[1] - val[0] + 1;
-		sc->params.eo_wr_cred = val[2];
-		sc->params.ethoffload = 1;
+		if (val[1] > val[0]) {
+			sc->tids.etid_base = val[0];
+			sc->tids.etid_end = val[1];
+			sc->tids.netids = val[1] - val[0] + 1;
+			sc->params.eo_wr_cred = val[2];
+			sc->params.ethoffload = 1;
+		}
 	}
 	if (sc->toecaps) {
 		/* query offload-related parameters */
@@ -3951,8 +3953,10 @@ get_params__post_init(struct adapter *sc)
 		}
 		sc->tids.ntids = val[0];
 		sc->tids.natids = min(sc->tids.ntids / 2, MAX_ATIDS);
-		sc->tids.stid_base = val[1];
-		sc->tids.nstids = val[2] - val[1] + 1;
+		if (val[2] > val[1]) {
+			sc->tids.stid_base = val[1];
+			sc->tids.nstids = val[2] - val[1] + 1;
+		}
 		sc->vres.ddp.start = val[3];
 		sc->vres.ddp.size = val[4] - val[3] + 1;
 		sc->params.ofldq_wr_cred = val[5];
@@ -8612,34 +8616,35 @@ sysctl_tc_params(SYSCTL_HANDLER_ARGS)
 	tc = sc->port[port_id]->sched_params->cl_rl[i];
 	mtx_unlock(&sc->tc_lock);
 
-	if (tc.flags & TX_CLRL_ERROR) {
-		sbuf_printf(sb, "error");
-		goto done;
-	}
-
-	if (tc.ratemode == SCHED_CLASS_RATEMODE_REL) {
-		/* XXX: top speed or actual link speed? */
-		gbps = port_top_speed(sc->port[port_id]);
-		sbuf_printf(sb, " %u%% of %uGbps", tc.maxrate, gbps);
-	} else if (tc.ratemode == SCHED_CLASS_RATEMODE_ABS) {
-		switch (tc.rateunit) {
-		case SCHED_CLASS_RATEUNIT_BITS:
+	switch (tc.rateunit) {
+	case SCHED_CLASS_RATEUNIT_BITS:
+		switch (tc.ratemode) {
+		case SCHED_CLASS_RATEMODE_REL:
+			/* XXX: top speed or actual link speed? */
+			gbps = port_top_speed(sc->port[port_id]);
+			sbuf_printf(sb, "%u%% of %uGbps", tc.maxrate, gbps);
+			break;
+		case SCHED_CLASS_RATEMODE_ABS:
 			mbps = tc.maxrate / 1000;
 			gbps = tc.maxrate / 1000000;
 			if (tc.maxrate == gbps * 1000000)
-				sbuf_printf(sb, " %uGbps", gbps);
+				sbuf_printf(sb, "%uGbps", gbps);
 			else if (tc.maxrate == mbps * 1000)
-				sbuf_printf(sb, " %uMbps", mbps);
+				sbuf_printf(sb, "%uMbps", mbps);
 			else
-				sbuf_printf(sb, " %uKbps", tc.maxrate);
-			break;
-		case SCHED_CLASS_RATEUNIT_PKTS:
-			sbuf_printf(sb, " %upps", tc.maxrate);
+				sbuf_printf(sb, "%uKbps", tc.maxrate);
 			break;
 		default:
 			rc = ENXIO;
 			goto done;
 		}
+		break;
+	case SCHED_CLASS_RATEUNIT_PKTS:
+		sbuf_printf(sb, "%upps", tc.maxrate);
+		break;
+	default:
+		rc = ENXIO;
+		goto done;
 	}
 
 	switch (tc.mode) {
