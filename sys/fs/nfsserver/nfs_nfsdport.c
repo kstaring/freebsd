@@ -1799,7 +1799,7 @@ nfsrvd_readdir(struct nfsrv_descript *nd, int isdgram,
 	struct nfsvattr at;
 	int nlen, error = 0, getret = 1;
 	int siz, cnt, fullsiz, eofflag, ncookies;
-	u_int64_t off, toff, verf;
+	u_int64_t off, toff, verf __unused;
 	u_long *cookies = NULL, *cookiep;
 	struct uio io;
 	struct iovec iv;
@@ -2101,6 +2101,7 @@ nfsrvd_readdirplus(struct nfsrv_descript *nd, int isdgram,
 	}
 	fullsiz = siz;
 	nd->nd_repstat = getret = nfsvno_getattr(vp, &at, nd, p, 1, NULL);
+#if 0
 	if (!nd->nd_repstat) {
 	    if (off && verf != at.na_filerev) {
 		/*
@@ -2109,17 +2110,14 @@ nfsrvd_readdirplus(struct nfsrv_descript *nd, int isdgram,
 		 * removed/added unless that offset cookies returned to
 		 * the client are no longer valid.
 		 */
-#if 0
 		if (nd->nd_flag & ND_NFSV4) {
 			nd->nd_repstat = NFSERR_NOTSAME;
 		} else {
 			nd->nd_repstat = NFSERR_BAD_COOKIE;
 		}
-#endif
-	    } else if ((nd->nd_flag & ND_NFSV4) && off == 0 && verf != 0) {
-		nd->nd_repstat = NFSERR_BAD_COOKIE;
 	    }
 	}
+#endif
 	if (!nd->nd_repstat && vp->v_type != VDIR)
 		nd->nd_repstat = NFSERR_NOTDIR;
 	if (!nd->nd_repstat && cnt == 0)
@@ -4006,7 +4004,7 @@ nfsrv_pnfscreate(struct vnode *vp, struct vattr *vap, struct ucred *cred,
 		tdsc->p = p;
 		tdsc->pf = tpf;
 		tdsc->createva = *vap;
-		tdsc->fh = fh;
+		NFSBCOPY(&fh, &tdsc->fh, sizeof(fh));
 		tdsc->va = va;
 		tdsc->dvp = dvp[i];
 		tdsc->done = 0;
@@ -5066,7 +5064,7 @@ nfsrv_writedsrpc(fhandle_t *fhp, off_t off, int len, struct ucred *cred,
 	error = 0;
 	for (i = 0; i < mirrorcnt - 1; i++, tdrpc++) {
 		tdrpc->done = 0;
-		tdrpc->fh = *fhp;
+		NFSBCOPY(fhp, &tdrpc->fh, sizeof(*fhp));
 		tdrpc->off = off;
 		tdrpc->len = len;
 		tdrpc->nmp = *nmpp;
@@ -5252,7 +5250,7 @@ nfsrv_setattrdsrpc(fhandle_t *fhp, struct ucred *cred, NFSPROC_T *p,
 	for (i = 0; i < mirrorcnt - 1; i++, tdrpc++) {
 		tdrpc->done = 0;
 		tdrpc->inprog = 0;
-		tdrpc->fh = *fhp;
+		NFSBCOPY(fhp, &tdrpc->fh, sizeof(*fhp));
 		tdrpc->nmp = *nmpp;
 		tdrpc->vp = vp;
 		tdrpc->cred = cred;
@@ -5400,7 +5398,7 @@ nfsrv_setacldsrpc(fhandle_t *fhp, struct ucred *cred, NFSPROC_T *p,
 	for (i = 0; i < mirrorcnt - 1; i++, tdrpc++) {
 		tdrpc->done = 0;
 		tdrpc->inprog = 0;
-		tdrpc->fh = *fhp;
+		NFSBCOPY(fhp, &tdrpc->fh, sizeof(*fhp));
 		tdrpc->nmp = *nmpp;
 		tdrpc->vp = vp;
 		tdrpc->cred = cred;
