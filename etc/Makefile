@@ -13,8 +13,6 @@ SUBDIR+=sendmail
 .endif
 
 BIN1=	crontab \
-	devd.conf \
-	devfs.conf \
 	dhclient.conf \
 	disktab \
 	fbtab \
@@ -33,14 +31,11 @@ BIN1=	crontab \
 	networks \
 	nsswitch.conf \
 	phones \
-	profile \
 	protocols \
 	rc.bsdextended \
 	rc.firewall \
 	remote \
 	rpc \
-	services \
-	syslog.conf \
 	termcap.small
 
 .if exists(${.CURDIR}/etc.${MACHINE}/ttys)
@@ -59,10 +54,6 @@ BIN1+=	etc.${MACHINE_CPUARCH}/ttys
 BIN1+= amd.map
 .endif
 
-.if ${MK_FTP} != "no"
-BIN1+= ftpusers
-.endif
-
 .if ${MK_LOCATE} != "no"
 BIN1+=	${SRCTOP}/usr.bin/locate/locate/locate.rc
 .endif
@@ -75,21 +66,12 @@ BIN1+=	hosts.lpd printcap
 BIN1+=	${SRCTOP}/usr.bin/mail/misc/mail.rc
 .endif
 
-.if ${MK_OPENSSH} != "no"
-SSH=	${SRCTOP}/crypto/openssh/ssh_config \
-	${SRCTOP}/crypto/openssh/sshd_config \
-	${SRCTOP}/crypto/openssh/moduli
-.endif
 .if ${MK_OPENSSL} != "no"
 SSL=	${SRCTOP}/crypto/openssl/apps/openssl.cnf
 .endif
 
 .if ${MK_SENDMAIL} != "no"
 BIN1+=	rc.sendmail
-.endif
-
-.if ${MK_TCSH} != "no"
-BIN1+= csh.cshrc csh.login csh.logout
 .endif
 
 .if ${MK_WIRELESS} != "no"
@@ -139,12 +121,6 @@ distribution:
 	    ${INSTALL} -o ${BINOWN} -g ${BINGRP} -m 600 \
 		master.passwd nsmb.conf opieaccess ${DESTDIR}/etc;
 
-.if ${MK_SERVICESDB} != "no"
-	cd ${.CURDIR}; \
-	    services_mkdb ${CAP_MKDB_ENDIAN} -q -o ${DESTDIR}/var/db/services.db \
-		${DESTDIR}/etc/services;
-.endif
-
 .if ${MK_TCSH} == "no"
 	sed -i "" -e 's;/bin/csh;/bin/sh;' ${DESTDIR}/etc/master.passwd
 .endif
@@ -155,18 +131,11 @@ distribution:
 		echo "./etc/passwd type=file mode=0644 uname=root gname=wheel"; \
 		echo "./etc/pwd.db type=file mode=0644 uname=root gname=wheel"; \
 		echo "./etc/spwd.db type=file mode=0600 uname=root gname=wheel"; \
-		echo "./var/db/services.db type=file mode=0644 uname=root gname=wheel"; \
 	) | ${METALOG.add}
 .endif
-.if ${MK_BLUETOOTH} != "no"
-	${_+_}cd ${.CURDIR}/bluetooth; ${MAKE} install
-.endif
-	${_+_}cd ${.CURDIR}/defaults; ${MAKE} install
-	${_+_}cd ${.CURDIR}/devd; ${MAKE} install
 	${_+_}cd ${.CURDIR}/gss; ${MAKE} install
 	${_+_}cd ${.CURDIR}/mtree; ${MAKE} install
 	${_+_}cd ${SRCTOP}/share/termcap; ${MAKE} etc-termcap
-	${_+_}cd ${.CURDIR}/syslog.d; ${MAKE} install
 	${_+_}cd ${SRCTOP}/usr.sbin/rmt; ${MAKE} etc-rmt
 	${_+_}cd ${.CURDIR}/pam.d; ${MAKE} install
 .if ${MK_UNBOUND} != "no"
@@ -177,10 +146,6 @@ distribution:
 .if ${MK_SENDMAIL} != "no"
 	${_+_}cd ${.CURDIR}/sendmail; ${MAKE} distribution
 .endif
-.if ${MK_OPENSSH} != "no"
-	cd ${.CURDIR}; ${INSTALL} -o ${BINOWN} -g ${BINGRP} -m 644 \
-	    ${SSH} ${DESTDIR}/etc/ssh
-.endif
 .if ${MK_OPENSSL} != "no"
 	cd ${.CURDIR}; ${INSTALL} -o ${BINOWN} -g ${BINGRP} -m 644 \
 	    ${SSL} ${DESTDIR}/etc/ssl
@@ -190,20 +155,7 @@ distribution:
 	    ${INSTALL} -o ${BINOWN} -g ${BINGRP} -m 644 \
 		dot.k5login ${DESTDIR}/root/.k5login;
 .endif
-	cd ${.CURDIR}/root; \
-	    ${INSTALL} -o ${BINOWN} -g ${BINGRP} -m 644 \
-		dot.profile ${DESTDIR}/root/.profile; \
-	    rm -f ${DESTDIR}/.profile; \
-	    ${INSTALL_LINK} ${DESTDIR}/root/.profile ${DESTDIR}/.profile
-.if ${MK_TCSH} != "no"
-	cd ${.CURDIR}/root; \
-	    ${INSTALL} -o ${BINOWN} -g ${BINGRP} -m 644 \
-		dot.cshrc ${DESTDIR}/root/.cshrc; \
-	    ${INSTALL} -o ${BINOWN} -g ${BINGRP} -m 644 \
-		dot.login ${DESTDIR}/root/.login; \
-	    rm -f ${DESTDIR}/.cshrc; \
-	    ${INSTALL_LINK} ${DESTDIR}/root/.cshrc ${DESTDIR}/.cshrc
-.endif
+
 .if ${MK_MAIL} != "no"
 	cd ${.CURDIR}/mail; ${INSTALL} -o ${BINOWN} -g ${BINGRP} -m 644 \
 	    ${ETCMAIL} ${DESTDIR}/etc/mail
@@ -307,15 +259,10 @@ distrib-dirs: ${MTREES:N/*} distrib-cleanup .PHONY
 	done
 .endif
 
-etc-examples-install: ${META_DEPS}
+etc-examples: ${META_DEPS}
 	cd ${.CURDIR}; ${INSTALL} ${TAG_ARGS} -o ${BINOWN} -g ${BINGRP} -m 444 \
 	    ${BIN1} ${BIN2} nsmb.conf opieaccess \
 	    ${DESTDIR}${SHAREDIR}/examples/etc
-
-etc-examples: etc-examples-install
-	${_+_}cd ${.CURDIR}/defaults; \
-	    ${MAKE} ${${MK_STAGING} == "yes":?all:install} \
-	    DESTDIR=${DESTDIR}${SHAREDIR}/examples
 
 .include <bsd.prog.mk>
 
