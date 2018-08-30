@@ -190,6 +190,7 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					PIN_SUBVENDOR(ASUS_X556UR_SUBVENDOR),
 					PIN_SUBVENDOR(ASUS_X540LA_SUBVENDOR),
 					PIN_SUBVENDOR(ASUS_Z550MA_SUBVENDOR),
+					PIN_SUBVENDOR(ACER_F5_573G_SUBVENDOR),
 					{ }
 				},
 				.pin_patches = (struct pin_patch_t[]){
@@ -648,6 +649,132 @@ static struct hdaa_model_pin_patch_t realtek_model_pin_patches[] = {
 					{ }
 				},
 				.pin_patches = pin_patches_dell_xps_jack
+			}, { }
+		}
+	}, { /**** CODEC: HDA_CODEC_ALC662 ****/
+		.id = HDA_CODEC_ALC662,
+		.patches = (struct model_pin_patch_t[]){
+			{
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ACER_8924G_SUBVENDOR),
+					PIN_SUBVENDOR(ACER_8943G_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(21, "seq=2 as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(SAMSUNG_R720_SUBVENDOR),
+					PIN_SUBVENDOR(LENOVO_Y550P_SUBVENDOR),
+					PIN_SUBVENDOR(LENOVO_Y550_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(23, "seq=2 as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(HP_RP5800_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(20, "seq=15 as=1 color=Grey ctype=1/8 device=Headphones loc=Front"),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ASUS_N50VM_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_K73JN_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_11D3ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1203ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_660JX_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_Z71V_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N81DE_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F50GX_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F50Z_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N80VC_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_VX5_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N81TE_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N505TP_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F5GL_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_VX3V_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1953ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N5051A_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N20_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F7Z_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_19E3ID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(24, "as=2 misc=12 color=Pink ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_STRING(25, "seq=15 as=2 misc=9 ctype=ATAPI device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_HP_OUT(33),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(COEUS_9087ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_11F3ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1339ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_16C3ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_K40C_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1753ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1783ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X58LE_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1813ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1843ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1864ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1876ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_1913ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F80Q_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F5Z_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(24,  "as=2 misc=8 color=Pink ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_STRING(25, "seq=15 as=2 misc=9 ctype=ATAPI device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_HP_OUT(27),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ASUS_1092ID_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_M70V_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N90_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_F70SL_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_M50VM_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X55_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_X71C_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(21, "seq=15 as=1 misc=4 color=Green ctype=1/8 device=Headphones loc=Rear"),
+					PIN_PATCH_STRING(24, "as=4 misc=8 color=Pink ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_STRING(25, "seq=15 as=4 misc=9 ctype=ATAPI device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(33, "as=2 misc=4 color=Black ctype=1/8 device=Headphones loc=Rear"),
+					{ }
+				}
+			}, {
+				.models = (struct pin_machine_model_t[]){
+					PIN_SUBVENDOR(ASUS_N750_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_N76VZ_SUBVENDOR),
+					PIN_SUBVENDOR(ASUS_19F3ID_SUBVENDOR),
+					{ }
+				},
+				.pin_patches = (struct pin_patch_t[]){
+					PIN_PATCH_STRING(20, "as=1 misc=1 ctype=ATAPI device=Speaker loc=Onboard conn=Fixed"),
+					PIN_PATCH_SUBWOOFER(22),
+					PIN_PATCH_STRING(24, "as=4 misc=8 color=Pink ctype=1/8 device=Mic loc=Rear"),
+					PIN_PATCH_STRING(25, "seq=15 as=4 misc=9 ctype=ATAPI device=Mic loc=Onboard conn=Fixed"),
+					PIN_PATCH_STRING(33, "seq=15 as=1 misc=4 color=Green ctype=1/8 device=Headphones loc=Rear"),
+					{ }
+				}
 			}, { }
 		}
 	}, { /**** CODEC: HDA_CODEC_ALC861 ****/
