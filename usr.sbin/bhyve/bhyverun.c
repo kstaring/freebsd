@@ -83,6 +83,7 @@ __FBSDID("$FreeBSD$");
 #include "xmsr.h"
 #include "spinup_ap.h"
 #include "rtc.h"
+#include "pci_hda.h"
 
 #define GUEST_NIO_PORT		0x488	/* guest upcalls via i/o port */
 
@@ -922,7 +923,7 @@ main(int argc, char *argv[])
 	rtc_localtime = 1;
 	memflags = 0;
 
-	optstr = "abehuwxACHIPSWYp:g:G:c:s:m:l:U:";
+	optstr = "abehuwxACHIPSWYp:g:G:c:s:m:l:U:M:V:";
 	while ((c = getopt(argc, argv, optstr)) != -1) {
 		switch (c) {
 		case 'a':
@@ -984,6 +985,11 @@ main(int argc, char *argv[])
 			if (error)
 				errx(EX_USAGE, "invalid memsize '%s'", optarg);
 			break;
+		case 'M':
+			if (strlen(optarg) != 6 || strstr(optarg, "0x") != optarg)
+				errx(EX_USAGE, "invalid snd_hda machine id '%s', should be in the form 0xXXXX where XXXX is a hexadecimal number", optarg);
+			hda_machine_id = strtol(optarg + 2, NULL, 16);
+			break;
 		case 'H':
 			guest_vmexit_on_hlt = 1;
 			break;
@@ -1007,6 +1013,11 @@ main(int argc, char *argv[])
 			break;
 		case 'U':
 			guest_uuid_str = optarg;
+			break;
+		case 'V':
+			if (strlen(optarg) != 6 || strstr(optarg, "0x") != optarg)
+				errx(EX_USAGE, "invalid snd_hda vendor id '%s', should be in the form 0xXXXX where XXXX is a hexadecimal number", optarg);
+			hda_vendor_id = strtol(optarg + 2, NULL, 16);
 			break;
 		case 'w':
 			strictmsr = 0;
