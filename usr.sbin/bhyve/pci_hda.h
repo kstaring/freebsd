@@ -43,6 +43,7 @@
 
 #include "hda_reg.h"
 
+extern u_int32_t hda_chip_id;
 extern u_int32_t hda_vendor_id;
 extern u_int32_t hda_machine_id;
 

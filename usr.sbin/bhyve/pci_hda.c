@@ -7,6 +7,7 @@
 #include "hdac_reg.h"
 #include "pci_hda.h"
 
+u_int32_t hda_chip_id = 0;
 u_int32_t hda_vendor_id = 0;
 u_int32_t hda_machine_id = 0;
 
@@ -1284,8 +1285,11 @@ pci_hda_init(struct vmctx *ctx, struct pci_devinst *pi, char *opts)
 	if (!hda_machine_id)
 		hda_machine_id = HDA_MACHINEID;
 
-	pci_set_cfgdata16(pi, PCIR_VENDOR, hda_vendor_id);
-	pci_set_cfgdata16(pi, PCIR_DEVICE, hda_machine_id);
+	pci_set_cfgdata16(pi, PCIR_SUBVEND_0, hda_vendor_id);
+	pci_set_cfgdata16(pi, PCIR_SUBDEV_0, hda_machine_id);
+
+	pci_set_cfgdata16(pi, PCIR_DEVICE, hda_chip_id);
+	pci_set_cfgdata16(pi, PCIR_VENDOR, 0x8086);
 
 	pci_set_cfgdata8(pi, PCIR_SUBCLASS, PCIS_MULTIMEDIA_HDA);
 	pci_set_cfgdata8(pi, PCIR_CLASS, PCIC_MULTIMEDIA);

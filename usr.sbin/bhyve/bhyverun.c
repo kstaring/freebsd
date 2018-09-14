@@ -923,7 +923,7 @@ main(int argc, char *argv[])
 	rtc_localtime = 1;
 	memflags = 0;
 
-	optstr = "abehuwxACHIPSWYp:g:G:c:s:m:l:U:M:V:";
+	optstr = "abehuwxACHIPSWYp:g:G:c:s:m:l:U:M:B:V:";
 	while ((c = getopt(argc, argv, optstr)) != -1) {
 		switch (c) {
 		case 'a':
@@ -1013,6 +1013,11 @@ main(int argc, char *argv[])
 			break;
 		case 'U':
 			guest_uuid_str = optarg;
+			break;
+		case 'B':
+			if (strlen(optarg) != 6 || strstr(optarg, "0x") != optarg)
+				errx(EX_USAGE, "invalid snd_hda chip id '%s', should be in the form 0xXXXX where XXXX is a hexadecimal number", optarg);
+			hda_chip_id = strtol(optarg + 2, NULL, 16);
 			break;
 		case 'V':
 			if (strlen(optarg) != 6 || strstr(optarg, "0x") != optarg)
