@@ -153,7 +153,8 @@ static vop_setextattr_t nfs_setextattr;
 /*
  * Global vfs data structures for nfs
  */
-struct vop_vector newnfs_vnodeops = {
+
+static struct vop_vector newnfs_vnodeops_nosig = {
 	.vop_default =		&default_vnodeops,
 	.vop_access =		nfs_access,
 	.vop_advlock =		nfs_advlock,
@@ -192,7 +193,19 @@ struct vop_vector newnfs_vnodeops = {
 	.vop_set_text =		nfs_set_text,
 };
 
-struct vop_vector newnfs_fifoops = {
+static int
+nfs_vnodeops_bypass(struct vop_generic_args *a)
+{
+
+	return (vop_sigdefer(&newnfs_vnodeops_nosig, a));
+}
+
+struct vop_vector newnfs_vnodeops = {
+	.vop_default =		&default_vnodeops,
+	.vop_bypass =		nfs_vnodeops_bypass,
+};
+
+static struct vop_vector newnfs_fifoops_nosig = {
 	.vop_default =		&fifo_specops,
 	.vop_access =		nfsspec_access,
 	.vop_close =		nfsfifo_close,
@@ -205,6 +218,18 @@ struct vop_vector newnfs_fifoops = {
 	.vop_reclaim =		ncl_reclaim,
 	.vop_setattr =		nfs_setattr,
 	.vop_write =		nfsfifo_write,
+};
+
+static int
+nfs_fifoops_bypass(struct vop_generic_args *a)
+{
+
+	return (vop_sigdefer(&newnfs_fifoops_nosig, a));
+}
+
+struct vop_vector newnfs_fifoops = {
+	.vop_default =		&default_vnodeops,
+	.vop_bypass =		nfs_fifoops_bypass,
 };
 
 static int nfs_mknodrpc(struct vnode *dvp, struct vnode **vpp,
