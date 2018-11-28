@@ -438,11 +438,13 @@ dev/sfxge/common/efx_phy.c	optional	sfxge pci
 dev/sfxge/common/efx_port.c	optional	sfxge pci
 dev/sfxge/common/efx_rx.c	optional	sfxge pci
 dev/sfxge/common/efx_sram.c	optional	sfxge pci
+dev/sfxge/common/efx_tunnel.c	optional	sfxge pci
 dev/sfxge/common/efx_tx.c	optional	sfxge pci
 dev/sfxge/common/efx_vpd.c	optional	sfxge pci
 dev/sfxge/common/hunt_nic.c	optional	sfxge pci
 dev/sfxge/common/mcdi_mon.c	optional	sfxge pci
 dev/sfxge/common/medford_nic.c	optional	sfxge pci
+dev/sfxge/common/medford2_nic.c	optional	sfxge pci
 dev/sfxge/common/siena_mac.c	optional	sfxge pci
 dev/sfxge/common/siena_mcdi.c	optional	sfxge pci
 dev/sfxge/common/siena_nic.c	optional	sfxge pci
@@ -721,6 +723,7 @@ x86/isa/isa_dma.c		standard
 x86/isa/nmi.c			standard
 x86/isa/orm.c			optional	isa
 x86/pci/pci_bus.c		optional	pci
+x86/pci/pci_early_quirks.c	optional	pci
 x86/pci/qpi.c			optional	pci
 x86/x86/autoconf.c		standard
 x86/x86/bus_machdep.c		standard

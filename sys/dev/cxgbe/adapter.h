@@ -41,6 +41,7 @@
 #include <sys/malloc.h>
 #include <sys/rwlock.h>
 #include <sys/sx.h>
+#include <sys/vmem.h>
 #include <vm/uma.h>
 
 #include <dev/pci/pcivar.h>
@@ -80,6 +81,8 @@ prefetch(void *x)
 #define sysctl_handle_64 sysctl_handle_quad
 #define CTLTYPE_U64 CTLTYPE_QUAD
 #endif
+
+SYSCTL_DECL(_hw_cxgbe);
 
 struct adapter;
 typedef struct adapter adapter_t;
@@ -574,6 +577,7 @@ struct sge_txq {
 	uint64_t txpkts1_wrs;	/* # of type1 coalesced tx work requests */
 	uint64_t txpkts0_pkts;	/* # of frames in type0 coalesced tx WRs */
 	uint64_t txpkts1_pkts;	/* # of frames in type1 coalesced tx WRs */
+	uint64_t raw_wrs;	/* # of raw work requests (alloc_wr_mbuf) */
 
 	/* stats for not-that-common events */
 } __aligned(CACHE_LINE_SIZE);
@@ -825,6 +829,7 @@ struct adapter {
 	struct l2t_data *l2t;	/* L2 table */
 	struct smt_data *smt;	/* Source MAC Table */
 	struct tid_info tids;
+	vmem_t *key_map;
 
 	uint8_t doorbells;
 	int offload_map;	/* ports with IFCAP_TOE enabled */
@@ -1170,6 +1175,7 @@ void t4_intr_err(void *);
 void t4_intr_evt(void *);
 void t4_wrq_tx_locked(struct adapter *, struct sge_wrq *, struct wrqe *);
 void t4_update_fl_bufsize(struct ifnet *);
+struct mbuf *alloc_wr_mbuf(int, int);
 int parse_pkt(struct adapter *, struct mbuf **);
 void *start_wrq_wr(struct sge_wrq *, int, struct wrq_cookie *);
 void commit_wrq_wr(struct sge_wrq *, void *, struct wrq_cookie *);
