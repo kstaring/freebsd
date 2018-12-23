@@ -1026,11 +1026,7 @@ typedef	struct	iplog	{
 #define	IPLOG_SIZE	sizeof(iplog_t)
 
 typedef	struct	ipflog	{
-#if (defined(NetBSD) && (NetBSD <= 1991011) && (NetBSD >= 199603)) || \
-        (defined(OpenBSD) && (OpenBSD >= 199603))
-#else
-	u_int	fl_unit;
-#endif
+	u_int		fl_unit;
 	u_32_t		fl_rule;
 	u_32_t		fl_flags;
 	u_32_t		fl_lflags;
@@ -1437,22 +1433,6 @@ typedef	struct	ipftune	{
 #if !defined(CDEV_MAJOR) && defined (__FreeBSD_version) && \
     (__FreeBSD_version >= 220000)
 # define	CDEV_MAJOR	79
-#endif
-
-/*
- * Post NetBSD 1.2 has the PFIL interface for packet filters.  This turns
- * on those hooks.  We don't need any special mods in non-IP Filter code
- * with this!
- */
-#if (defined(NetBSD) && (NetBSD > 199609) && (NetBSD <= 1991011)) || \
-    (defined(NetBSD1_2) && NetBSD1_2 > 1) || \
-    (defined(__FreeBSD__) && (__FreeBSD_version >= 500043))
-# if (defined(NetBSD) && NetBSD >= 199905)
-#  define PFIL_HOOKS
-# endif
-# ifdef PFIL_HOOKS
-#  define NETBSD_PF
-# endif
 #endif
 
 #ifdef _KERNEL
