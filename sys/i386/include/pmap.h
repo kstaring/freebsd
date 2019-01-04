@@ -125,7 +125,7 @@
 
 /*
  * The initial number of kernel page table pages that are constructed
- * by locore must be sufficient to map vm_page_array.  That number can
+ * by pmap_cold() must be sufficient to map vm_page_array[].  That number can
  * be calculated as follows:
  *     max_phys / PAGE_SIZE * sizeof(struct vm_page) / NBPDR
  * PAE:      max_phys 16G, sizeof(vm_page) 76, NBPDR 2M, 152 page table pages.
@@ -228,11 +228,37 @@ extern pd_entry_t *IdlePTD;	/* physical address of "Idle" state directory */
  * a kernel page table page after the corresponding virtual addresses have
  * been promoted to a 2/4MB page mapping.
  *
- * KPTmap is first initialized by locore to support just NPKT page table
+ * KPTmap is first initialized by pmap_cold() to support just NPKT page table
  * pages.  Later, it is reinitialized by pmap_bootstrap() to allow for
  * expansion of the kernel page table.
  */
 extern pt_entry_t *KPTmap;
+
+#if (defined(PAE) || defined(PAE_TABLES))
+
+#define	pde_cmpset(pdep, old, new)	atomic_cmpset_64_i586(pdep, old, new)
+#define	pte_load_store(ptep, pte)	atomic_swap_64_i586(ptep, pte)
+#define	pte_load_clear(ptep)		atomic_swap_64_i586(ptep, 0)
+#define	pte_store(ptep, pte)		atomic_store_rel_64_i586(ptep, pte)
+#define	pte_load(ptep)			atomic_load_acq_64_i586(ptep)
+
+extern pt_entry_t pg_nx;
+
+#else /* !(PAE || PAE_TABLES) */
+
+#define	pde_cmpset(pdep, old, new)	atomic_cmpset_int(pdep, old, new)
+#define	pte_load_store(ptep, pte)	atomic_swap_int(ptep, pte)
+#define	pte_load_clear(ptep)		atomic_swap_int(ptep, 0)
+#define	pte_store(ptep, pte) do { \
+	*(u_int *)(ptep) = (u_int)(pte); \
+} while (0)
+#define	pte_load(ptep)			atomic_load_acq_int(ptep)
+
+#endif /* !(PAE || PAE_TABLES) */
+
+#define	pte_clear(ptep)			pte_store(ptep, 0)
+
+#define	pde_store(pdep, pde)		pte_store(pdep, pde)
 
 /*
  * Extract from the kernel page table the physical address that is mapped by
@@ -245,7 +271,7 @@ pmap_kextract(vm_offset_t va)
 {
 	vm_paddr_t pa;
 
-	if ((pa = PTD[va >> PDRSHIFT]) & PG_PS) {
+	if ((pa = pte_load(&PTD[va >> PDRSHIFT])) & PG_PS) {
 		pa = (pa & PG_PS_FRAME) | (va & PDRMASK);
 	} else {
 		/*
@@ -260,30 +286,6 @@ pmap_kextract(vm_offset_t va)
 	}
 	return (pa);
 }
-
-#if (defined(PAE) || defined(PAE_TABLES))
-
-#define	pde_cmpset(pdep, old, new)	atomic_cmpset_64_i586(pdep, old, new)
-#define	pte_load_store(ptep, pte)	atomic_swap_64_i586(ptep, pte)
-#define	pte_load_clear(ptep)		atomic_swap_64_i586(ptep, 0)
-#define	pte_store(ptep, pte)		atomic_store_rel_64_i586(ptep, pte)
-
-extern pt_entry_t pg_nx;
-
-#else /* !(PAE || PAE_TABLES) */
-
-#define	pde_cmpset(pdep, old, new)	atomic_cmpset_int(pdep, old, new)
-#define	pte_load_store(ptep, pte)	atomic_swap_int(ptep, pte)
-#define	pte_load_clear(ptep)		atomic_swap_int(ptep, 0)
-#define	pte_store(ptep, pte) do { \
-	*(u_int *)(ptep) = (u_int)(pte); \
-} while (0)
-
-#endif /* !(PAE || PAE_TABLES) */
-
-#define	pte_clear(ptep)			pte_store(ptep, 0)
-
-#define	pde_store(pdep, pde)		pte_store(pdep, pde)
 
 #endif /* _KERNEL */
 
