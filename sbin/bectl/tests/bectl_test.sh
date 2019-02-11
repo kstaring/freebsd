@@ -42,13 +42,27 @@ bectl_create_setup()
 	atf_check zfs create -o mountpoint=/ -o canmount=noauto \
 	    ${zpool}/ROOT/default
 }
+bectl_create_deep_setup()
+{
+	zpool=$1
+	disk=$2
+	mnt=$3
+
+	bectl_create_setup ${zpool} ${disk} ${mnt}
+	atf_check mkdir -p ${root}
+	atf_check -o ignore bectl -r ${zpool}/ROOT mount default ${root}
+	atf_check mkdir -p ${root}/usr
+	atf_check zfs create -o mountpoint=/usr -o canmount=noauto \
+	    ${zpool}/ROOT/default/usr
+	atf_check -o ignore bectl -r ${zpool}/ROOT umount default
+}
 
 bectl_cleanup()
 {
 	zpool=$1
 
 	if zpool get health ${zpool} >/dev/null 2>&1; then
-		zpool destroy ${zpool}
+		zpool destroy -f ${zpool}
 	fi
 }
 
@@ -96,7 +110,7 @@ bectl_destroy_body()
 	bectl_create_setup ${zpool} ${disk} ${mount}
 	atf_check bectl -r ${zpool}/ROOT create -e default default2
 	atf_check -o not-empty zfs get mountpoint ${zpool}/ROOT/default2
-	atf_check bectl -r ${zpool}/ROOT destroy default2
+	atf_check -e ignore bectl -r ${zpool}/ROOT destroy default2
 	atf_check -e not-empty -s not-exit:0 zfs get mountpoint ${zpool}/ROOT/default2
 }
 bectl_destroy_cleanup()
@@ -123,7 +137,7 @@ bectl_export_import_body()
 	atf_check -o save:exported bectl -r ${zpool}/ROOT export default
 	atf_check -x "bectl -r ${zpool}/ROOT import default2 < exported"
 	atf_check -o not-empty zfs get mountpoint ${zpool}/ROOT/default2
-	atf_check bectl -r ${zpool}/ROOT destroy default2
+	atf_check -e ignore bectl -r ${zpool}/ROOT destroy default2
 	atf_check -e not-empty -s not-exit:0 zfs get mountpoint \
 	    ${zpool}/ROOT/default2
 }
@@ -157,7 +171,7 @@ bectl_list_body()
 	atf_check bectl -r ${zpool}/ROOT create -e default default2
 	atf_check -o save:list.out bectl -r ${zpool}/ROOT list
 	atf_check -o not-empty grep 'default2' list.out
-	atf_check bectl -r ${zpool}/ROOT destroy default2
+	atf_check -e ignore bectl -r ${zpool}/ROOT destroy default2
 	atf_check -o save:list.out bectl -r ${zpool}/ROOT list
 	atf_check -s not-exit:0 grep 'default2' list.out
 	# XXX TODO: Formatting checks
@@ -183,7 +197,7 @@ bectl_mount_body()
 	mount=${cwd}/mnt
 	root=${mount}/root
 
-	bectl_create_setup ${zpool} ${disk} ${mount}
+	bectl_create_deep_setup ${zpool} ${disk} ${mount}
 	atf_check mkdir -p ${root}
 	# Test unmount first...
 	atf_check -o not-empty bectl -r ${zpool}/ROOT mount default ${root}
@@ -246,7 +260,7 @@ bectl_jail_body()
 	if [ ! -f /rescue/rescue ]; then
 		atf_skip "This test requires a rescue binary"
 	fi
-	bectl_create_setup ${zpool} ${disk} ${mount}
+	bectl_create_deep_setup ${zpool} ${disk} ${mount}
 	# Prepare our minimal BE... plop a rescue binary into it
 	atf_check mkdir -p ${root}
 	atf_check -o ignore bectl -r ${zpool}/ROOT mount default ${root}
@@ -263,9 +277,9 @@ bectl_jail_body()
 	atf_check -o empty -s exit:0 bectl -r ${zpool}/ROOT unjail default
 
 	# Basic command-mode tests, with and without jail cleanup
-	atf_check -o inline:"rescue\n" bectl -r ${zpool}/ROOT \
+	atf_check -o inline:"rescue\nusr\n" bectl -r ${zpool}/ROOT \
 	    jail default /rescue/rescue ls -1
-	atf_check -o inline:"rescue\n" bectl -r ${zpool}/ROOT \
+	atf_check -o inline:"rescue\nusr\n" bectl -r ${zpool}/ROOT \
 	    jail -Uo path=${root} default /rescue/rescue ls -1
 	atf_check [ -f ${root}/rescue/rescue ]
 	atf_check bectl -r ${zpool}/ROOT ujail default
