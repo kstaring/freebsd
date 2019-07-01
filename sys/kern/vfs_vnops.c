@@ -54,6 +54,7 @@ __FBSDID("$FreeBSD$");
 #include <sys/fcntl.h>
 #include <sys/file.h>
 #include <sys/kdb.h>
+#include <sys/ktr.h>
 #include <sys/stat.h>
 #include <sys/priv.h>
 #include <sys/proc.h>
@@ -498,9 +499,8 @@ sequential_heuristic(struct uio *uio, struct file *fp)
 		 * closely related to the best I/O size for real disks than
 		 * to any block size used by software.
 		 */
-		fp->f_seqcount += howmany(uio->uio_resid, 16384);
-		if (fp->f_seqcount > IO_SEQMAX)
-			fp->f_seqcount = IO_SEQMAX;
+		fp->f_seqcount += lmin(IO_SEQMAX,
+		    howmany(uio->uio_resid, 16384));
 		return (fp->f_seqcount << IO_SEQSHIFT);
 	}
 
@@ -1466,6 +1466,7 @@ vn_ioctl(struct file *fp, u_long com, void *data, struct ucred *active_cred,
 {
 	struct vattr vattr;
 	struct vnode *vp;
+	struct fiobmap2_arg *bmarg;
 	int error;
 
 	vp = fp->f_vnode;
@@ -1479,6 +1480,18 @@ vn_ioctl(struct file *fp, u_long com, void *data, struct ucred *active_cred,
 			VOP_UNLOCK(vp, 0);
 			if (error == 0)
 				*(int *)data = vattr.va_size - fp->f_offset;
+			return (error);
+		case FIOBMAP2:
+			bmarg = (struct fiobmap2_arg *)data;
+			vn_lock(vp, LK_SHARED | LK_RETRY);
+#ifdef MAC
+			error = mac_vnode_check_read(active_cred, fp->f_cred,
+			    vp);
+			if (error == 0)
+#endif
+				error = VOP_BMAP(vp, bmarg->bn, NULL,
+				    &bmarg->bn, &bmarg->runp, &bmarg->runb);
+			VOP_UNLOCK(vp, 0);
 			return (error);
 		case FIONBIO:
 		case FIOASYNC:

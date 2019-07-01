@@ -1623,7 +1623,7 @@ cxgbe_probe(device_t dev)
 #define T4_CAP (IFCAP_VLAN_HWTAGGING | IFCAP_VLAN_MTU | IFCAP_HWCSUM | \
     IFCAP_VLAN_HWCSUM | IFCAP_TSO | IFCAP_JUMBO_MTU | IFCAP_LRO | \
     IFCAP_VLAN_HWTSO | IFCAP_LINKSTATE | IFCAP_HWCSUM_IPV6 | IFCAP_HWSTATS | \
-    IFCAP_HWRXTSTMP)
+    IFCAP_HWRXTSTMP | IFCAP_NOMAP)
 #define T4_CAP_ENABLE (T4_CAP)
 
 static int
@@ -1986,6 +1986,8 @@ cxgbe_ioctl(struct ifnet *ifp, unsigned long cmd, caddr_t data)
 					rxq->iq.flags &= ~IQ_RX_TIMESTAMP;
 			}
 		}
+		if (mask & IFCAP_NOMAP)
+			ifp->if_capenable ^= IFCAP_NOMAP;
 
 #ifdef VLAN_CAPABILITIES
 		VLAN_CAPABILITIES(ifp);
@@ -2057,13 +2059,8 @@ cxgbe_transmit(struct ifnet *ifp, struct mbuf *m)
 		return (rc);
 	}
 #ifdef RATELIMIT
-	if (m->m_pkthdr.snd_tag != NULL) {
-		/* EAGAIN tells the stack we are not the correct interface. */
-		if (__predict_false(ifp != m->m_pkthdr.snd_tag->ifp)) {
-			m_freem(m);
-			return (EAGAIN);
-		}
-
+	if (m->m_pkthdr.csum_flags & CSUM_SND_TAG) {
+		MPASS(m->m_pkthdr.snd_tag->ifp == ifp);
 		return (ethofld_transmit(ifp, m));
 	}
 #endif
@@ -6237,8 +6234,10 @@ t4_sysctls(struct adapter *sc)
 		    &sc->tt.sndbuf, 0, "max hardware send buffer size");
 
 		sc->tt.ddp = 0;
-		SYSCTL_ADD_INT(ctx, children, OID_AUTO, "ddp", CTLFLAG_RW,
-		    &sc->tt.ddp, 0, "DDP allowed");
+		SYSCTL_ADD_INT(ctx, children, OID_AUTO, "ddp",
+		    CTLFLAG_RW | CTLFLAG_SKIP, &sc->tt.ddp, 0, "");
+		SYSCTL_ADD_INT(ctx, children, OID_AUTO, "rx_zcopy", CTLFLAG_RW,
+		    &sc->tt.ddp, 0, "Enable zero-copy aio_read(2)");
 
 		sc->tt.rx_coalesce = 1;
 		SYSCTL_ADD_INT(ctx, children, OID_AUTO, "rx_coalesce",
@@ -9714,7 +9713,7 @@ set_offload_policy(struct adapter *sc, struct t4_offload_policy *uop)
 		/* Delete installed policies. */
 		op = NULL;
 		goto set_policy;
-	} if (uop->nrules > 256) { /* arbitrary */
+	} else if (uop->nrules > 256) { /* arbitrary */
 		return (E2BIG);
 	}
 

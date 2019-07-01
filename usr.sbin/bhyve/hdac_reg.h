@@ -1,4 +1,6 @@
 /*-
+ * SPDX-License-Identifier: BSD-2-Clause-FreeBSD
+ *
  * Copyright (c) 2006 Stephane E. Potvin <sepotvin@videotron.ca>
  * All rights reserved.
  *
@@ -100,7 +102,8 @@
 #define _HDAC_OSDBDPL(n, iss, oss)	(0x18 + _HDAC_OSDOFFSET(n, iss, oss))
 #define _HDAC_OSDBDPU(n, iss, oss)	(0x1c + _HDAC_OSDOFFSET(n, iss, oss))
 
-#define _HDAC_BSDOFFSET(n, iss, oss)	(0x80 + ((iss) * 0x20) + ((oss) * 0x20) + ((n) * 0x20))
+#define _HDAC_BSDOFFSET(n, iss, oss)					\
+	(0x80 + ((iss) * 0x20) + ((oss) * 0x20) + ((n) * 0x20))
 #define _HDAC_BSDCTL(n, iss, oss)	(0x00 + _HDAC_BSDOFFSET(n, iss, oss))
 #define _HDAC_BSDSTS(n, iss, oss)	(0x03 + _HDAC_BSDOFFSET(n, iss, oss))
 #define _HDAC_BSDPICB(n, iss, oss)	(0x04 + _HDAC_BSDOFFSET(n, iss, oss))
@@ -265,4 +268,4 @@
 #define HDAC_SDSTS_FIFOE		(1 << 3)
 #define HDAC_SDSTS_BCIS			(1 << 2)
 
-#endif
+#endif /* _HDAC_REG_H_ */

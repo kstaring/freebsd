@@ -1,4 +1,6 @@
 /*-
+ * SPDX-License-Identifier: BSD-2-Clause-FreeBSD
+ *
  * Copyright (c) 2006 Stephane E. Potvin <sepotvin@videotron.ca>
  * All rights reserved.
  *
@@ -1364,4 +1366,4 @@
 #define HDA_CONFIG_DEFAULTCONF_DEVICE_DIGITAL_OTHER_IN		(13<<20)
 #define HDA_CONFIG_DEFAULTCONF_DEVICE_OTHER			(15<<20)
 
-#endif
+#endif /* _HDA_REG_H_ */

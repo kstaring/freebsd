@@ -960,8 +960,25 @@ g_eli_create(struct gctl_req *req, struct g_class *mp, struct g_provider *bpp,
 	G_ELI_DEBUG(0, "Device %s created.", pp->name);
 	G_ELI_DEBUG(0, "Encryption: %s %u", g_eli_algo2str(sc->sc_ealgo),
 	    sc->sc_ekeylen);
-	if (sc->sc_flags & G_ELI_FLAG_AUTH)
+	switch (sc->sc_ealgo) {
+	case CRYPTO_3DES_CBC:
+		gone_in(13,
+		    "support for GEOM_ELI volumes encrypted with 3des");
+		break;
+	case CRYPTO_BLF_CBC:
+		gone_in(13,
+		    "support for GEOM_ELI volumes encrypted with blowfish");
+		break;
+	}
+	if (sc->sc_flags & G_ELI_FLAG_AUTH) {
 		G_ELI_DEBUG(0, " Integrity: %s", g_eli_algo2str(sc->sc_aalgo));
+		switch (sc->sc_aalgo) {
+		case CRYPTO_MD5_HMAC:
+			gone_in(13,
+		    "support for GEOM_ELI volumes authenticated with hmac/md5");
+			break;
+		}
+	}
 	G_ELI_DEBUG(0, "    Crypto: %s",
 	    sc->sc_crypto == G_ELI_CRYPTO_SW ? "software" : "hardware");
 	return (gp);
@@ -1311,17 +1328,17 @@ g_eli_dumpconf(struct sbuf *sb, const char *indent, struct g_geom *gp,
 	    (uintmax_t)sc->sc_ekeys_allocated);
 	sbuf_printf(sb, "%s<Flags>", indent);
 	if (sc->sc_flags == 0)
-		sbuf_printf(sb, "NONE");
+		sbuf_cat(sb, "NONE");
 	else {
 		int first = 1;
 
 #define ADD_FLAG(flag, name)	do {					\
 	if (sc->sc_flags & (flag)) {					\
 		if (!first)						\
-			sbuf_printf(sb, ", ");				\
+			sbuf_cat(sb, ", ");				\
 		else							\
 			first = 0;					\
-		sbuf_printf(sb, name);					\
+		sbuf_cat(sb, name);					\
 	}								\
 } while (0)
 		ADD_FLAG(G_ELI_FLAG_SUSPEND, "SUSPEND");
@@ -1341,7 +1358,7 @@ g_eli_dumpconf(struct sbuf *sb, const char *indent, struct g_geom *gp,
 		ADD_FLAG(G_ELI_FLAG_AUTORESIZE, "AUTORESIZE");
 #undef  ADD_FLAG
 	}
-	sbuf_printf(sb, "</Flags>\n");
+	sbuf_cat(sb, "</Flags>\n");
 
 	if (!(sc->sc_flags & G_ELI_FLAG_ONETIME)) {
 		sbuf_printf(sb, "%s<UsedKey>%u</UsedKey>\n", indent,
@@ -1351,16 +1368,16 @@ g_eli_dumpconf(struct sbuf *sb, const char *indent, struct g_geom *gp,
 	sbuf_printf(sb, "%s<Crypto>", indent);
 	switch (sc->sc_crypto) {
 	case G_ELI_CRYPTO_HW:
-		sbuf_printf(sb, "hardware");
+		sbuf_cat(sb, "hardware");
 		break;
 	case G_ELI_CRYPTO_SW:
-		sbuf_printf(sb, "software");
+		sbuf_cat(sb, "software");
 		break;
 	default:
-		sbuf_printf(sb, "UNKNOWN");
+		sbuf_cat(sb, "UNKNOWN");
 		break;
 	}
-	sbuf_printf(sb, "</Crypto>\n");
+	sbuf_cat(sb, "</Crypto>\n");
 	if (sc->sc_flags & G_ELI_FLAG_AUTH) {
 		sbuf_printf(sb,
 		    "%s<AuthenticationAlgorithm>%s</AuthenticationAlgorithm>\n",
