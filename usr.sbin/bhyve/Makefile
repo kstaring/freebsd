@@ -29,7 +29,6 @@ SRCS=	\
 	fwctl.c			\
 	hda_codec.c		\
 	gdb.c			\
-	hda_codec.c		\
 	inout.c			\
 	ioapic.c		\
 	mem.c			\

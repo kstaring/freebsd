@@ -1063,7 +1063,7 @@ main(int argc, char *argv[])
 		case 'M':
 			if (strlen(optarg) != 6 || strstr(optarg, "0x") != optarg)
 				errx(EX_USAGE, "invalid snd_hda machine id '%s', should be in the form 0xXXXX where XXXX is a hexadecimal number", optarg);
-			hda_machine_id = strtol(optarg + 2, NULL, 16);
+			//hda_machine_id = strtol(optarg + 2, NULL, 16);
 			break;
 		case 'H':
 			guest_vmexit_on_hlt = 1;
@@ -1092,12 +1092,12 @@ main(int argc, char *argv[])
 		case 'B':
 			if (strlen(optarg) != 6 || strstr(optarg, "0x") != optarg)
 				errx(EX_USAGE, "invalid snd_hda chip id '%s', should be in the form 0xXXXX where XXXX is a hexadecimal number", optarg);
-			hda_chip_id = strtol(optarg + 2, NULL, 16);
+			//hda_chip_id = strtol(optarg + 2, NULL, 16);
 			break;
 		case 'V':
 			if (strlen(optarg) != 6 || strstr(optarg, "0x") != optarg)
 				errx(EX_USAGE, "invalid snd_hda vendor id '%s', should be in the form 0xXXXX where XXXX is a hexadecimal number", optarg);
-			hda_vendor_id = strtol(optarg + 2, NULL, 16);
+			//hda_vendor_id = strtol(optarg + 2, NULL, 16);
 			break;
 		case 'w':
 			strictmsr = 0;
