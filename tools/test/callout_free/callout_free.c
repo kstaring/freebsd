@@ -1,5 +1,7 @@
 /*-
- * Copyright (c) 2015 Nuxi, https://nuxi.nl/
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2019 Eric van Gyzen
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -21,68 +23,65 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
+ *
+ * $FreeBSD$
  */
 
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
+/*
+ * Free a pending callout.  This was useful for testing the
+ * "show callout_last" ddb command.
+ */
 
 #include <sys/param.h>
-#include <sys/ptrace.h>
+#include <sys/conf.h>
+#include <sys/kernel.h>
+#include <sys/lock.h>
+#include <sys/module.h>
+#include <sys/mutex.h>
+#include <sys/systm.h>
 
-#include <machine/armreg.h>
+static struct callout callout_free;
+static struct mtx callout_free_mutex;
+static int callout_free_arg;
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <sysdecode.h>
-
-#include "truss.h"
-
-static int
-aarch64_cloudabi64_fetch_args(struct trussinfo *trussinfo, unsigned int narg)
+static void
+callout_free_func(void *arg)
 {
-	struct current_syscall *cs;
-	struct reg regs;
-	lwpid_t tid;
-	unsigned int i;
-
-	tid = trussinfo->curthread->tid;
-	if (ptrace(PT_GETREGS, tid, (caddr_t)&regs, 0) == -1) {
-		fprintf(trussinfo->outfile, "-- CANNOT READ REGISTERS --\n");
-		return (-1);
-	}
-
-	cs = &trussinfo->curthread->cs;
-	for (i = 0; i < narg && i < 8; i++)
-		cs->args[i] = regs.x[i];
-	return (0);
+	printf("squirrel!\n");
+	mtx_destroy(&callout_free_mutex);
+	memset(&callout_free, 'C', sizeof(callout_free));
 }
 
 static int
-aarch64_cloudabi64_fetch_retval(struct trussinfo *trussinfo, long *retval,
-    int *errorp)
+callout_free_load(module_t mod, int cmd, void *arg)
 {
-	struct reg regs;
-	lwpid_t tid;
+	int error;
 
-	tid = trussinfo->curthread->tid;
-	if (ptrace(PT_GETREGS, tid, (caddr_t)&regs, 0) == -1) {
-		fprintf(trussinfo->outfile, "-- CANNOT READ REGISTERS --\n");
-		return (-1);
+	switch (cmd) {
+	case MOD_LOAD:
+		mtx_init(&callout_free_mutex, "callout_free", NULL, MTX_DEF);
+		/*
+		 * Do not pass CALLOUT_RETURNUNLOCKED so the callout
+		 * subsystem will unlock the "destroyed" mutex.
+		 */
+		callout_init_mtx(&callout_free, &callout_free_mutex, 0);
+		printf("callout_free_func = %p\n", callout_free_func);
+		printf("callout_free_arg = %p\n", &callout_free_arg);
+		callout_reset(&callout_free, hz/10, callout_free_func,
+		    &callout_free_arg);
+		error = 0;
+		break;
+
+	case MOD_UNLOAD:
+		error = 0;
+		break;
+
+	default:
+		error = EOPNOTSUPP;
+		break;
 	}
 
-	retval[0] = regs.x[0];
-	retval[1] = regs.x[1];
-	*errorp = (regs.spsr & PSR_C) != 0;
-	return (0);
+	return (error);
 }
 
-static struct procabi aarch64_cloudabi64 = {
-	"CloudABI ELF64",
-	SYSDECODE_ABI_CLOUDABI64,
-	aarch64_cloudabi64_fetch_args,
-	aarch64_cloudabi64_fetch_retval,
-	STAILQ_HEAD_INITIALIZER(aarch64_cloudabi64.extra_syscalls),
-	{ NULL }
-};
-
-PROCABI(aarch64_cloudabi64);
+DEV_MODULE(callout_free, callout_free_load, NULL);
