@@ -8,6 +8,8 @@ SUBDIR_PARALLEL=
 # Modules that include binary-only blobs of microcode should be selectable by
 # MK_SOURCELESS_UCODE option (see below).
 
+.include "${SYSDIR}/conf/config.mk"
+
 .if defined(MODULES_OVERRIDE) && !defined(ALL_MODULES)
 SUBDIR=${MODULES_OVERRIDE}
 .else
@@ -397,7 +399,9 @@ _autofs=	autofs
 .if ${MK_CDDL} != "no" || defined(ALL_MODULES)
 .if (${MACHINE_CPUARCH} != "arm" || ${MACHINE_ARCH:Marmv[67]*} != "") && \
 	${MACHINE_CPUARCH} != "mips"
+.if ${KERN_OPTS:MKDTRACE_HOOKS}
 SUBDIR+=	dtrace
+.endif
 .endif
 SUBDIR+=	opensolaris
 .endif
@@ -713,7 +717,9 @@ _sgx_linux=	sgx_linux
 _smartpqi=	smartpqi
 
 .if ${MK_BHYVE} != "no" || defined(ALL_MODULES)
+.if ${KERN_OPTS:MSMP}
 _vmm=		vmm
+.endif
 .endif
 .endif
 
@@ -799,8 +805,6 @@ afterinstall: .PHONY
 		${KLDXREF_CMD} ${DESTDIR}${KMODDIR}; \
 	fi
 .endif
-
-.include "${SYSDIR}/conf/config.mk"
 
 SUBDIR:= ${SUBDIR:u:O}
 

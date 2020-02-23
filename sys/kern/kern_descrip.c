@@ -847,7 +847,7 @@ kern_fcntl(struct thread *td, int fd, int cmd, intptr_t arg)
 		 * and any vfs op on this vnode going forward will return an
 		 * error (meaning return value in this case is meaningless).
 		 */
-		mp = (struct mount *)atomic_load_ptr(&vp->v_mount);
+		mp = atomic_load_ptr(&vp->v_mount);
 		if (__predict_false(mp == NULL)) {
 			fdrop(fp, td);
 			error = EBADF;
@@ -1978,7 +1978,8 @@ finstall(struct thread *td, struct file *fp, int *fd, int flags,
 	if (!fhold(fp))
 		return (EBADF);
 	FILEDESC_XLOCK(fdp);
-	if ((error = fdalloc(td, 0, fd))) {
+	error = fdalloc(td, 0, fd);
+	if (__predict_false(error != 0)) {
 		FILEDESC_XUNLOCK(fdp);
 		fdrop(fp, td);
 		return (error);
@@ -2651,6 +2652,7 @@ fget_cap(struct thread *td, int fd, cap_rights_t *needrightsp,
 	struct file *fp;
 	seqc_t seq;
 
+	*fpp = NULL;
 	for (;;) {
 		error = fget_unlocked_seq(fdp, fd, needrightsp, &fp, &seq);
 		if (error != 0)
@@ -2739,7 +2741,7 @@ fget_unlocked_seq(struct filedesc *fdp, int fd, cap_rights_t *needrightsp,
 			 * table before this fd was closed, so it is possible
 			 * that there is a stale fp pointer in cached version.
 			 */
-			fdt = (struct fdescenttbl *)atomic_load_ptr(&fdp->fd_files);
+			fdt = atomic_load_ptr(&fdp->fd_files);
 			continue;
 		}
 		/*
@@ -2897,7 +2899,7 @@ fget(struct thread *td, int fd, cap_rights_t *rightsp, struct file **fpp)
 }
 
 int
-fget_mmap(struct thread *td, int fd, cap_rights_t *rightsp, u_char *maxprotp,
+fget_mmap(struct thread *td, int fd, cap_rights_t *rightsp, vm_prot_t *maxprotp,
     struct file **fpp)
 {
 	int error;
@@ -2905,26 +2907,29 @@ fget_mmap(struct thread *td, int fd, cap_rights_t *rightsp, u_char *maxprotp,
 	error = _fget(td, fd, fpp, 0, rightsp);
 	if (maxprotp != NULL)
 		*maxprotp = VM_PROT_ALL;
+	return (error);
 #else
 	cap_rights_t fdrights;
 	struct filedesc *fdp;
+	struct file *fp;
 	seqc_t seq;
 
+	*fpp = NULL;
 	fdp = td->td_proc->p_fd;
 	MPASS(cap_rights_is_set(rightsp, CAP_MMAP));
 	for (;;) {
-		error = fget_unlocked_seq(fdp, fd, rightsp, fpp, &seq);
+		error = fget_unlocked_seq(fdp, fd, rightsp, &fp, &seq);
 		if (__predict_false(error != 0))
 			return (error);
-		if (__predict_false((*fpp)->f_ops == &badfileops)) {
-			fdrop(*fpp, td);
+		if (__predict_false(fp->f_ops == &badfileops)) {
+			fdrop(fp, td);
 			return (EBADF);
 		}
 		if (maxprotp != NULL)
 			fdrights = *cap_rights(fdp, fd);
 		if (!fd_modified(fdp, fd, seq))
 			break;
-		fdrop(*fpp, td);
+		fdrop(fp, td);
 	}
 
 	/*
@@ -2932,8 +2937,9 @@ fget_mmap(struct thread *td, int fd, cap_rights_t *rightsp, u_char *maxprotp,
 	 */
 	if (maxprotp != NULL)
 		*maxprotp = cap_rights_to_vmprot(&fdrights);
+	*fpp = fp;
+	return (0);
 #endif
-	return (error);
 }
 
 int
@@ -2958,24 +2964,27 @@ fget_fcntl(struct thread *td, int fd, cap_rights_t *rightsp, int needfcntl,
 #ifndef CAPABILITIES
 	return (fget_unlocked(fdp, fd, rightsp, fpp));
 #else
+	struct file *fp;
 	int error;
 	seqc_t seq;
 
+	*fpp = NULL;
 	MPASS(cap_rights_is_set(rightsp, CAP_FCNTL));
 	for (;;) {
-		error = fget_unlocked_seq(fdp, fd, rightsp, fpp, &seq);
+		error = fget_unlocked_seq(fdp, fd, rightsp, &fp, &seq);
 		if (error != 0)
 			return (error);
 		error = cap_fcntl_check(fdp, fd, needfcntl);
 		if (!fd_modified(fdp, fd, seq))
 			break;
-		fdrop(*fpp, td);
+		fdrop(fp, td);
 	}
 	if (error != 0) {
-		fdrop(*fpp, td);
-		*fpp = NULL;
+		fdrop(fp, td);
+		return (error);
 	}
-	return (error);
+	*fpp = fp;
+	return (0);
 #endif
 }
 
@@ -3592,7 +3601,7 @@ export_file_to_kinfo(struct file *fp, int fd, cap_rights_t *rightsp,
 	if (rightsp != NULL)
 		kif->kf_cap_rights = *rightsp;
 	else
-		cap_rights_init(&kif->kf_cap_rights);
+		cap_rights_init_zero(&kif->kf_cap_rights);
 	kif->kf_fd = fd;
 	kif->kf_ref_count = fp->f_count;
 	kif->kf_offset = foffset_get(fp);
@@ -3623,7 +3632,7 @@ export_vnode_to_kinfo(struct vnode *vp, int fd, int fflags,
 	if (error == 0)
 		kif->kf_status |= KF_ATTR_VALID;
 	kif->kf_flags = xlate_fflags(fflags);
-	cap_rights_init(&kif->kf_cap_rights);
+	cap_rights_init_zero(&kif->kf_cap_rights);
 	kif->kf_fd = fd;
 	kif->kf_ref_count = -1;
 	kif->kf_offset = -1;

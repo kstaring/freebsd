@@ -58,6 +58,8 @@
 #include <sys/malloc.h>
 #include <sys/mbuf.h>
 #include <sys/mutex.h>
+#include <sys/proc.h>
+#include <sys/epoch.h>
 #include <sys/priv.h>
 #include <sys/protosw.h>
 #include <sys/queue.h>
@@ -403,10 +405,12 @@ static int
 ngd_send(struct socket *so, int flags, struct mbuf *m, struct sockaddr *addr,
 	 struct mbuf *control, struct thread *td)
 {
+	struct epoch_tracker et;
 	struct ngpcb *const pcbp = sotongpcb(so);
 	struct sockaddr_ng *const sap = (struct sockaddr_ng *) addr;
 	int	len, error;
 	hook_p  hook = NULL;
+	item_p	item;
 	char	hookname[NG_HOOKSIZ];
 
 	if ((pcbp == NULL) || (control != NULL)) {
@@ -459,7 +463,11 @@ ngd_send(struct socket *so, int flags, struct mbuf *m, struct sockaddr *addr,
 	}
 
 	/* Send data. */
-	NG_SEND_DATA_FLAGS(error, hook, m, NG_WAITOK);
+	item = ng_package_data(m, NG_WAITOK);
+	m = NULL;
+	NET_EPOCH_ENTER(et);
+	NG_FWD_ITEM_HOOK(error, item, hook);
+	NET_EPOCH_EXIT(et);
 
 release:
 	if (control != NULL)
