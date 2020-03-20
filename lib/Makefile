@@ -53,12 +53,15 @@ SUBDIR=	${SUBDIR_BOOTSTRAP} \
 	libexpat \
 	libfetch \
 	libfigpar \
+	libgcc_eh \
+	libgcc_s \
 	libgeom \
 	libifconfig \
 	libipsec \
 	libjail \
 	libkiconv \
 	libkvm \
+	liblua \
 	liblzma \
 	libmemstat \
 	libmd \
@@ -177,8 +180,6 @@ _libcplusplus+=	libc++experimental
 SUBDIR.${MK_EFI}+=	libefivar
 SUBDIR.${MK_GOOGLETEST}+=	googletest
 SUBDIR.${MK_LIBTHR}+=	libthr
-SUBDIR.${MK_LLVM_LIBUNWIND}+=	libgcc_eh
-SUBDIR.${MK_LLVM_LIBUNWIND}+=	libgcc_s
 SUBDIR.${MK_NETGRAPH}+=	libnetgraph
 SUBDIR.${MK_NIS}+=	libypclnt
 
