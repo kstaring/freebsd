@@ -79,6 +79,8 @@ __DEFAULT_YES_OPTIONS = \
     CCD \
     CDDL \
     CLANG \
+    CLANG_BOOTSTRAP \
+    CLANG_IS_CC \
     CPP \
     CROSS_COMPILER \
     CRYPT \
@@ -104,7 +106,6 @@ __DEFAULT_YES_OPTIONS = \
     FTP \
     GAMES \
     GDB \
-    GDB_LIBEXEC \
     GNU_DIFF \
     GNU_GREP \
     GOOGLETEST \
@@ -129,6 +130,9 @@ __DEFAULT_YES_OPTIONS = \
     LIBPTHREAD \
     LIBTHR \
     LLD \
+    LLD_BOOTSTRAP \
+    LLD_IS_LD \
+    LLVM_ASSERTIONS \
     LLVM_COV \
     LLVM_TARGET_ALL \
     LOADER_GELI \
@@ -214,7 +218,6 @@ __DEFAULT_NO_OPTIONS = \
     SORT_THREADS \
     SVN \
     ZONEINFO_LEAPSECONDS_SUPPORT \
-    ZONEINFO_OLD_TIMEZONES_SUPPORT \
 
 # LEFT/RIGHT. Left options which default to "yes" unless their corresponding
 # RIGHT option is disabled.
@@ -283,29 +286,17 @@ __DEFAULT_NO_OPTIONS+=LLVM_TARGET_BPF
 
 .include <bsd.compiler.mk>
 
-.if ${__T:Mmips*} == ""
-# Clang is installed as the default /usr/bin/cc.
-__DEFAULT_YES_OPTIONS+=CLANG_BOOTSTRAP CLANG_IS_CC
-.else
-# Clang is enabled but we still require an external toolchain.
-__DEFAULT_NO_OPTIONS+=CLANG_BOOTSTRAP CLANG_IS_CC
-.endif
 # In-tree binutils/gcc are older versions without modern architecture support.
 .if ${__T} == "aarch64" || ${__T:Mriscv*} != ""
 BROKEN_OPTIONS+=BINUTILS BINUTILS_BOOTSTRAP GDB
 .endif
-.if ${__T} == "amd64" || ${__T} == "i386" || ${__T:Mpowerpc*}
+.if ${__T} == "amd64" || ${__T} == "i386"
 __DEFAULT_YES_OPTIONS+=BINUTILS_BOOTSTRAP
 .else
 __DEFAULT_NO_OPTIONS+=BINUTILS_BOOTSTRAP
 .endif
 .if ${__T:Mriscv*} != ""
 BROKEN_OPTIONS+=OFED
-.endif
-.if ${__T:Mmips*} != "mips" && ${__T} != "powerpc" && ${__T} != "powerpcspe"
-__DEFAULT_YES_OPTIONS+=LLD_BOOTSTRAP LLD_IS_LD
-.else
-__DEFAULT_NO_OPTIONS+=LLD_BOOTSTRAP LLD_IS_LD
 .endif
 .if ${__T} == "aarch64" || ${__T} == "amd64" || ${__T} == "i386"
 __DEFAULT_YES_OPTIONS+=LLDB
@@ -474,7 +465,6 @@ MK_GOOGLETEST:=	no
 
 .if ${MK_ZONEINFO} == "no"
 MK_ZONEINFO_LEAPSECONDS_SUPPORT:= no
-MK_ZONEINFO_OLD_TIMEZONES_SUPPORT:= no
 .endif
 
 .if ${MK_CROSS_COMPILER} == "no"
