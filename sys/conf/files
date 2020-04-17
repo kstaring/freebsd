@@ -1923,6 +1923,7 @@ iwi_monitor.fw			optional iwimonitorfw | iwifw		\
 	compile-with	"${NORMAL_FW}"					\
 	no-obj no-implicit-rule						\
 	clean		"iwi_monitor.fw"
+dev/rtw/if_rtw.c		optional rtw
 dev/iwm/if_iwm.c		optional iwm
 dev/iwm/if_iwm_7000.c		optional iwm
 dev/iwm/if_iwm_8000.c		optional iwm
